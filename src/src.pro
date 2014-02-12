@@ -1,7 +1,7 @@
 TEMPLATE = lib 
 TARGET = ../lib/ignis
 
-DEFINES += NO_DCVIZ ARMA_USE_CXX11
+DEFINES += ARMA_USE_CXX11
 
 LIBS += -lpython2.7 -larmadillo -lconfig++
 
