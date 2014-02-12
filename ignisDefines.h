@@ -1,0 +1,13 @@
+#ifndef IGNISDEFINES_H
+#define IGNISDEFINES_H
+
+#define IGNIS_NX 5
+#define IGNIS_NY 5
+
+#define IGNIS_PERIODIC_X
+#define IGNIS_PERIODIC_Y
+
+#define IGNIS_VERBOSE
+#define IGNIS_FILE_IO
+
+#endif // IGNISDEFINES_H
