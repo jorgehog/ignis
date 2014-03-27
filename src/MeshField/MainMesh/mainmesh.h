@@ -23,11 +23,15 @@ class MainMesh : public MeshField
 {
 
 public:
-    MainMesh(const mat & topology, Ensemble &ensemble);
+    MainMesh(const mat & topology, Particles & particles);
 
-    uint getPopulation() const {
-        return IGNIS_N;
+    uint getPopulation() const;
+
+    bool isMainMesh() const
+    {
+        return true;
     }
+
 
     void eventLoop(uint N);
 
@@ -36,6 +40,18 @@ public:
     void dumpEvents() const;
 
     void dumpEventsToFile() const;
+
+
+
+    void setSilent(const bool state)
+    {
+        m_silent = state;
+    }
+
+    void setFileIOState(const bool state)
+    {
+        m_doFileIO = state;
+    }
 
 
 private:
@@ -69,6 +85,9 @@ private:
 
     void dumpLoopChunkInfo();
 
+    bool m_silent;
+
+    bool m_doFileIO;
 
 
 };

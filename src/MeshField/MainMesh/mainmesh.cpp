@@ -3,37 +3,37 @@
 
 #include <assert.h>
 
+#include "../../Particles/particles.h"
+
+#include "../../positionhandler.h"
+
 #include "../../Event/event.h"
 #include "../../Event/intrinsicevents.h"
-#include "../../Ensemble/ensemble.h"
+
+
 
 #include <iomanip>
 
 using namespace ignis;
 
-struct sortByPriority
+
+MainMesh::MainMesh(const mat &topology, Particles & particles):
+    MeshField(topology, particles, "MainMesh"),
+    m_silent(false),
+    m_doFileIO(true)
 {
-    inline bool operator() (const Event* event1, const Event* event2)
-    {
-        return (event1->getPriority() < event2->getPriority());
-    }
-};
-
-
-
-
-MainMesh::MainMesh(const mat &topology, Ensemble  & ensemble):
-    MeshField(topology, ensemble, "MainMesh")
-{
-
-    m_isMainMesh = true;
 
     setOutputPath("/tmp/");
 
-    for (uint i = 0; i < IGNIS_N; ++i) {
+    for (uint i = 0; i < positions->count(); ++i) {
         atoms.push_back(i);
     }
 
+}
+
+uint MainMesh::getPopulation() const
+{
+    return positions->count();
 }
 
 
@@ -44,9 +44,10 @@ void MainMesh::updateContainments()
         subField->resetSubFields();
     }
 
-    for (uint i = 0; i < IGNIS_N; ++i) {
+    for (uint i = 0; i < positions->count(); ++i) {
 
-        for (MeshField* subField : subFields){
+        for (MeshField* subField : subFields)
+        {
             (void)subField->checkSubFields(i);
         }
 
@@ -119,8 +120,6 @@ void MainMesh::eventLoop(uint N)
 
     }
 
-//    Event::dumpEventMatrixData(N-1);
-
 }
 
 void MainMesh::setOutputPath(std::string path)
@@ -140,17 +139,19 @@ void MainMesh::sendToTop(Event &event)
 void MainMesh::addIntrinsicEvents()
 {
 
-#ifdef IGNIS_VERBOSE
-    Event *_stdout = new _dumpEvents(this);
-    _stdout->setManualPriority();
-    addEvent(*_stdout);
-#endif
+    if (!m_silent)
+    {
+        Event *_stdout = new _dumpEvents(this);
+        _stdout->setManualPriority();
+        addEvent(*_stdout);
+    }
 
-#ifdef IGNIS_FILE_IO
-    Event *_fileio = new _dumpEventsToFile(this);
-    _fileio->setManualPriority();
-    addEvent(*_fileio);
-#endif
+    if (!m_doFileIO)
+    {
+        Event *_fileio = new _dumpEventsToFile(this);
+        _fileio->setManualPriority();
+        addEvent(*_fileio);
+    }
 
 }
 
@@ -158,13 +159,17 @@ void MainMesh::sortEvents()
 {
     std::sort(allEvents.begin(),
               allEvents.end(),
-              sortByPriority());
+              [] (const Event *e1, const Event *e2) {return e1->getPriority() < e2->getPriority();});
 }
 
 void MainMesh::initializeNewEvents()
 {
     for (Event* event : currentChunk->executeEvents) {
-        event->_initEvent();
+
+        if (!event->initialized())
+        {
+            event->initialize();
+        }
     }
 }
 

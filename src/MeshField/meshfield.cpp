@@ -1,17 +1,21 @@
 #include "meshfield.h"
 
 #include <sstream>
-#include "../Ensemble/ensemble.h"
+#include "../Particles/particles.h"
+#include "../positionhandler.h"
 #include "../Event/event.h"
 
 using namespace ignis;
 
-MeshField::MeshField(const mat &topology, Ensemble  & ensemble, const std::string description):
-    m_isMainMesh(false),
+MeshField::MeshField(const mat &topology, Particles &particles, const std::string description):
     volume(0),
     description(description)
 {
-    this->ensemble = &ensemble;
+
+    cout << "TMP: replace particles with positions (deduce type)" << endl;
+    positions = new DummyHandler<double>();
+
+    this->particles = &particles;
 
     setTopology(topology, false);
 
@@ -21,9 +25,9 @@ MeshField::MeshField(const mat &topology, Ensemble  & ensemble, const std::strin
 bool MeshField::isWithinThis(uint i) {
 
     for (uint j = 0; j < IGNIS_DIM; ++j) {
-        if (ensemble->pos(j, i) < topology(j, 0)){
+        if (particles->pos(j, i) < topology(j, 0)){
             return false;
-        } else if (ensemble->pos(j, i) > topology(j, 1)) {
+        } else if (particles->pos(j, i) > topology(j, 1)) {
             return false;
         }
     }
@@ -70,6 +74,7 @@ void MeshField::prepareEvents()
     }
 
 }
+
 
 bool MeshField::append(uint i)
 {
@@ -201,7 +206,7 @@ void MeshField::addEvent(Event & event)
 
     event.setOutputVariables();
 
-    event.setEnsemble(ensemble);
+    event.setParticles(particles);
 
     events.push_back(&event);
 
@@ -213,13 +218,19 @@ void MeshField::addSubField(MeshField  & subField)
 {
 
     if (notCompatible(subField)) {
-        std::cout << "subfield " << subField.description << " not compatible on " << description << std::endl;
-        std::cout << "CONFLICT:\nsubField\n" << subField.topology << " is out of bounds, similar to parent or inverted/empty\n" << topology << std::endl;
+
+        std::stringstream s;
+
+        s << "subfield " << subField.description << " not compatible on " << description << std::endl;
+        s << "CONFLICT:\nsubField\n" << subField.topology << " is out of bounds, similar to parent or inverted/empty\n" << topology << std::endl;
+
         mat issue = (-topology + subField.topology);
         issue.col(1)*=-1;
 
-        std::cout << "Issue at negative or non-zero region:\n" << issue << std::endl;
-        throw *meshException;
+        s << "Issue at negative or non-zero region:\n" << issue << std::endl;
+
+        throw std::logic_error(s.str());
+
         return;
     }
 

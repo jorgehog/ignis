@@ -16,30 +16,26 @@ using namespace arma;
 namespace ignis
 {
 
-struct Ensemble;
+struct Particles;
+
+template<typename pT>
+class PositionHandler;
+
 class Event;
+
 class MainMesh;
 
-class incorrectSubMeshPlacementException : public std::exception {
-
-    virtual const char* what() const throw()
-    {
-        return "Illegal placement of SubMesh";
-    }
-
-};
-
+//template<typename pT>
 class MeshField
 {
 
 protected:
 
-    bool m_isMainMesh;
-
-
     MeshField* parent;
 
-    Ensemble *ensemble;
+    Particles *particles;
+
+    PositionHandler<double> *positions;
 
     std::vector<uint> atoms;
 
@@ -55,7 +51,6 @@ protected:
     //As it recursively calls all subfields.
     void prepareEvents();
 
-
     bool append(uint i);
 
     bool checkSubFields(uint i);
@@ -70,13 +65,9 @@ protected:
         atoms.clear();
     }
 
-
-    incorrectSubMeshPlacementException * meshException;
-
-
 public:
 
-    MeshField(const mat & topology, Ensemble &ensemble,
+    MeshField(const mat & topology, Particles &particles,
               const std::string description = "meshField");
 
 
@@ -92,8 +83,9 @@ public:
     const std::string description;
 
 
-    bool isMainMesh () {
-        return m_isMainMesh;
+    virtual bool isMainMesh () const
+    {
+        return false;
     }
 
     void setParent(MeshField* parent) {
@@ -131,8 +123,8 @@ public:
         return atoms;
     }
 
-    const Ensemble * getEnsemble () const {
-        return ensemble;
+    const Particles * getParticles () const {
+        return particles;
     }
 
 

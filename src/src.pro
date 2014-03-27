@@ -1,3 +1,5 @@
+include(../../ignisdefines.pri)
+
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -5,12 +7,9 @@ TEMPLATE = lib
 
 TARGET = ../lib/ignis
 
-
-LIBS += -lpython2.7 -larmadillo -lconfig++
+LIBS += -larmadillo -lconfig++
 
 DEFINES += ARMA_MAT_PREALLOC=3
-
-INCLUDEPATH += /home/jorgehog/code/DCViz/include
 
 
 
@@ -20,13 +19,13 @@ SOURCES += MeshField/meshfield.cpp \
 
 HEADERS += \
     defines.h \
-    Ensemble/ensemble.h \
+    Particles/particles.h \
     MeshField/meshfield.h \
     Event/event.h \
     MeshField/MainMesh/mainmesh.h \
-    Event/predefinedEvents/predefinedevents.h \
-    gears.h \
-    Event/intrinsicevents.h
+    Event/predefinedevents.h \
+    Event/intrinsicevents.h \
+    positionhandler.h
 
 
 
@@ -55,6 +54,12 @@ QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS -O3 -DARMA_NO_DEBUG -DNDEBUG -g
 
 QMAKE_LFLAGS += -g
 
+
+DCViz {
+    LIBS += -lpython2.7
+    INCLUDEPATH += /home/jorgehog/code/DCViz/include
+    DEFINES += USE_DCVIZ
+}
 
 ccache {
     QMAKE_CXX = ccache $$QMAKE_CXX

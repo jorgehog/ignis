@@ -15,8 +15,12 @@
 namespace ignis
 {
 
-struct Ensemble;
+struct Particles;
 
+template<typename pT>
+class PositionHandler;
+
+//template<typename pT>
 class Event
 {
 protected:
@@ -58,16 +62,18 @@ protected:
     static mat observables;
 
 
-    MeshField* meshField;
+    MeshField *meshField;
 
-    Ensemble* ensemble;
+    Particles* particles;
+
+    PositionHandler<double> *positions;
 
 
     virtual void execute() = 0;
 
     uint nTimesExecuted;
 
-    bool initialized;
+    bool m_initialized;
 
 
     uint onsetTime = IGNIS_UNSET_UINT;
@@ -84,11 +90,9 @@ public:
         nTimesExecuted++;
     }
 
-    void _initEvent() {
-        if (initialized) return;
-
-        initialized = true;
-        initialize();
+    const bool & initialized() const
+    {
+        return m_initialized;
     }
 
     virtual void initialize(){}
@@ -157,8 +161,8 @@ public:
         *(this->value) = value;
     }
 
-    void setEnsemble(Ensemble* ensemble){
-        this->ensemble = ensemble;
+    void setParticles(Particles* particles){
+        this->particles = particles;
     }
 
     void setMeshField(MeshField* meshField){
