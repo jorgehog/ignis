@@ -25,8 +25,7 @@ HEADERS += \
     MeshField/meshfield.h \
     Event/event.h \
     MeshField/MainMesh/mainmesh.h \
-    Event/predefinedEvents/predefinedevents.h \
-    gears.h \
+    Event/predefinedevents.h \
     Event/intrinsicevents.h
 
 
