@@ -17,25 +17,15 @@ namespace ignis
 {
 
 struct Ensemble;
+
 class Event;
+
 class MainMesh;
-
-class incorrectSubMeshPlacementException : public std::exception {
-
-    virtual const char* what() const throw()
-    {
-        return "Illegal placement of SubMesh";
-    }
-
-};
 
 class MeshField
 {
 
 protected:
-
-    bool m_isMainMesh;
-
 
     MeshField* parent;
 
@@ -70,10 +60,6 @@ protected:
         atoms.clear();
     }
 
-
-    incorrectSubMeshPlacementException * meshException;
-
-
 public:
 
     MeshField(const mat & topology, Ensemble &ensemble,
@@ -92,8 +78,9 @@ public:
     const std::string description;
 
 
-    bool isMainMesh () {
-        return m_isMainMesh;
+    virtual bool isMainMesh () const
+    {
+        return false;
     }
 
     void setParent(MeshField* parent) {

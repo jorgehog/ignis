@@ -1,6 +1,4 @@
-#ifndef IGNIS_H
-#define IGNIS_H
-
+#pragma once
 
 #include "../src/Ensemble/ensemble.h"
 #include "../src/MeshField/meshfield.h"
@@ -15,6 +13,3 @@
 #include "../GUI/src/qtplatform.h"
 #include "../GUI/mainwindow.h"
 #endif
-
-
-#endif // IGNIS_H

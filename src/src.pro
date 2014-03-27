@@ -1,10 +1,11 @@
+include(../ignisdefines.pri)
+
 CONFIG -= app_bundle
 CONFIG -= qt
 
 TEMPLATE = lib 
 
 TARGET = ../lib/ignis
-
 
 LIBS += -lpython2.7 -larmadillo -lconfig++
 

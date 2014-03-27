@@ -1,5 +1,4 @@
-#ifndef MD_ENSEMBLE_H
-#define MD_ENSEMBLE_H
+#pragma once
 
 #include "../defines.h"
 
@@ -9,6 +8,7 @@ using namespace arma;
 
 namespace ignis
 {
+
 struct Ensemble
 {
 
@@ -24,6 +24,6 @@ struct Ensemble
     Ensemble(const vec & masses) : masses(masses), nSpecies(masses.n_elem) {}
 
 };
+
 }
 
-#endif // MD_ENSEMBLE_H
