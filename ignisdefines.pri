@@ -1,1 +1,0 @@
-DEFINES += IGNIS_DIM=2

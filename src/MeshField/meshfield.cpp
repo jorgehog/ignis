@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include "../Particles/particles.h"
+#include "../positionhandler.h"
 #include "../Event/event.h"
 
 using namespace ignis;
@@ -10,6 +11,10 @@ MeshField::MeshField(const mat &topology, Particles &particles, const std::strin
     volume(0),
     description(description)
 {
+
+    cout << "TMP: replace particles with positions (deduce type)" << endl;
+    positions = new DummyHandler<double>();
+
     this->particles = &particles;
 
     setTopology(topology, false);
@@ -69,6 +74,7 @@ void MeshField::prepareEvents()
     }
 
 }
+
 
 bool MeshField::append(uint i)
 {

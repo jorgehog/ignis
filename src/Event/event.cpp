@@ -2,6 +2,8 @@
 
 #include "../defines.h"
 
+#include "../positionhandler.h"
+
 #include <sstream>
 #include <iomanip>
 
@@ -17,8 +19,10 @@ Event::Event(std::string type, std::string unit, bool doOutput, bool toFile):
     toFile(toFile),
     unit(unit),
     nTimesExecuted(0),
-    initialized(false)
+    m_initialized(false)
 {
+    cout << "TMP: replace particles with positions (deduce type)" << endl;
+    positions = new DummyHandler<double>;
     totalCounter++;
 }
 

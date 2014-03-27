@@ -18,10 +18,14 @@ namespace ignis
 
 struct Particles;
 
+template<typename pT>
+class PositionHandler;
+
 class Event;
 
 class MainMesh;
 
+//template<typename pT>
 class MeshField
 {
 
@@ -30,6 +34,8 @@ protected:
     MeshField* parent;
 
     Particles *particles;
+
+    PositionHandler<double> *positions;
 
     std::vector<uint> atoms;
 
@@ -44,7 +50,6 @@ protected:
     //This should be executed from the MainMesh,
     //As it recursively calls all subfields.
     void prepareEvents();
-
 
     bool append(uint i);
 

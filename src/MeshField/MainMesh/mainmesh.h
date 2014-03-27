@@ -25,10 +25,7 @@ class MainMesh : public MeshField
 public:
     MainMesh(const mat & topology, Particles & particles);
 
-    uint getPopulation() const {
-        cout << "fix me " << endl;
-        return 0;
-    }
+    uint getPopulation() const;
 
     bool isMainMesh() const
     {

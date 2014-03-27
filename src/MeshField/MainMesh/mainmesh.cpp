@@ -3,9 +3,14 @@
 
 #include <assert.h>
 
+#include "../../Particles/particles.h"
+
+#include "../../positionhandler.h"
+
 #include "../../Event/event.h"
 #include "../../Event/intrinsicevents.h"
-#include "../../Particles/particles.h"
+
+
 
 #include <iomanip>
 
@@ -20,11 +25,15 @@ MainMesh::MainMesh(const mat &topology, Particles & particles):
 
     setOutputPath("/tmp/");
 
-    cout << "fix me" << endl;
-    for (uint i = 0; i < 0; ++i) {
+    for (uint i = 0; i < positions->count(); ++i) {
         atoms.push_back(i);
     }
 
+}
+
+uint MainMesh::getPopulation() const
+{
+    return positions->count();
 }
 
 
@@ -35,11 +44,10 @@ void MainMesh::updateContainments()
         subField->resetSubFields();
     }
 
+    for (uint i = 0; i < positions->count(); ++i) {
 
-    cout << "fix me" << endl;
-    for (uint i = 0; i < 0; ++i) {
-
-        for (MeshField* subField : subFields){
+        for (MeshField* subField : subFields)
+        {
             (void)subField->checkSubFields(i);
         }
 
@@ -157,7 +165,11 @@ void MainMesh::sortEvents()
 void MainMesh::initializeNewEvents()
 {
     for (Event* event : currentChunk->executeEvents) {
-        event->_initEvent();
+
+        if (!event->initialized())
+        {
+            event->initialize();
+        }
     }
 }
 

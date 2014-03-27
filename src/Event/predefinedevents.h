@@ -1,9 +1,13 @@
 #pragma once
 
-#include "../MeshField/meshfield.h"
 #include "event.h"
 
-#ifndef NO_DCVIZ
+#include "../MeshField/meshfield.h"
+
+#include "../positionhandler.h"
+
+
+#ifdef USE_DCVIZ
 #include <DCViz.h>
 #endif
 
@@ -75,8 +79,8 @@ public:
     randomShuffle() : Event("shuffling") {}
 
     void execute() {
-        cout << "fix me" << endl;
-        for (uint i = 0; i < 0; ++i) {
+
+        for (uint i = 0; i < positions->count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
                 particles->pos(j, i) = meshField->topology(j, 0) + drand48()*meshField->shape(j);
             }
@@ -101,8 +105,7 @@ public:
     countAtoms() : Event("Counting atoms", "", true) {}
 
     void execute(){
-        cout << "fix me" << endl;
-        setValue((meshField->getPopulation()/double(1))/(meshField->volume));
+        setValue((meshField->getPopulation()/double(positions->count()))/(meshField->volume));
     }
 
 };
@@ -180,12 +183,11 @@ public:
     void execute() {
         if ((*loopCycle % freq) == 0) {
 
-            cout << "fix me" << endl;
-            scaledPos = particles->pos;
+            scaledPos = *positions;
             scaledPos.row(0)/=meshField->shape(0);
             scaledPos.row(1)/=meshField->shape(1);
 
-            stringstream s;
+            std::stringstream s;
             s << path << "/ignisPos" << *loopCycle << ".arma";
             scaledPos.save(s.str());
         }
@@ -200,7 +202,7 @@ private:
 
 };
 
-#ifndef NO_DCVIZ
+#ifdef USE_DCVIZ
 class LauchDCViz : public Event {
 
 public:
