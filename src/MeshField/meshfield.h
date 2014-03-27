@@ -16,7 +16,7 @@ using namespace arma;
 namespace ignis
 {
 
-struct Ensemble;
+struct Particles;
 
 class Event;
 
@@ -29,7 +29,7 @@ protected:
 
     MeshField* parent;
 
-    Ensemble *ensemble;
+    Particles *particles;
 
     std::vector<uint> atoms;
 
@@ -62,7 +62,7 @@ protected:
 
 public:
 
-    MeshField(const mat & topology, Ensemble &ensemble,
+    MeshField(const mat & topology, Particles &particles,
               const std::string description = "meshField");
 
 
@@ -118,8 +118,8 @@ public:
         return atoms;
     }
 
-    const Ensemble * getEnsemble () const {
-        return ensemble;
+    const Particles * getParticles () const {
+        return particles;
     }
 
 

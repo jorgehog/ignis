@@ -9,7 +9,7 @@ using namespace arma;
 namespace ignis
 {
 
-struct Ensemble
+struct Particles
 {
 
     mat::fixed<IGNIS_DIM, IGNIS_N> pos;
@@ -19,9 +19,12 @@ struct Ensemble
 
     const vec masses;
 
-    const int nSpecies;
+    const uint & nSpecies() const
+    {
+        return masses.n_elem;
+    }
 
-    Ensemble(const vec & masses) : masses(masses), nSpecies(masses.n_elem) {}
+    Particles(const vec & masses) : masses(masses) {}
 
 };
 

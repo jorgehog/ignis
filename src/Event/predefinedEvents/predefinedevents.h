@@ -5,7 +5,7 @@
 #include "../../defines.h"
 
 #include "../../Event/event.h"
-#include "../../Ensemble/ensemble.h"
+#include "../../Particles/particles.h"
 #include "../../MeshField/meshfield.h"
 #include "../../gears.h"
 
@@ -40,25 +40,25 @@ public:
 #if defined (IGNIS_PERIODIC_X) || defined (IGNIS_PERIODIC_Y) || defined (IGNIS_PERIODIC_Z)
         for (uint i = 0; i < IGNIS_N; ++i) {
 #ifdef IGNIS_PERIODIC_X
-            if (ensemble->pos(0, i) < meshField->topology(0, 0)) {
-                ensemble->pos(0, i) += meshField->shape(0);
+            if (particles->pos(0, i) < meshField->topology(0, 0)) {
+                particles->pos(0, i) += meshField->shape(0);
             }
-            ensemble->pos(0, i) = meshField->topology(0, 0) +
-                    fmod(ensemble->pos(0, i) - meshField->topology(0, 0), meshField->shape(0));
+            particles->pos(0, i) = meshField->topology(0, 0) +
+                    fmod(particles->pos(0, i) - meshField->topology(0, 0), meshField->shape(0));
 #endif
 #ifdef IGNIS_PERIODIC_Y
-            if (ensemble->pos(1, i) < meshField->topology(1, 0)) {
-                ensemble->pos(1, i) += meshField->shape(1);
+            if (particles->pos(1, i) < meshField->topology(1, 0)) {
+                particles->pos(1, i) += meshField->shape(1);
             }
-            ensemble->pos(1, i) = meshField->topology(1, 0) +
-                    fmod(ensemble->pos(1, i) - meshField->topology(1, 0), meshField->shape(1));
+            particles->pos(1, i) = meshField->topology(1, 0) +
+                    fmod(particles->pos(1, i) - meshField->topology(1, 0), meshField->shape(1));
 #endif
 #ifdef IGNIS_PERIODIC_Z
-            if (ensemble->pos(2, i) < meshField->topology(2, 0)) {
-                ensemble->pos(2, i) += meshField->shape(2);
+            if (particles->pos(2, i) < meshField->topology(2, 0)) {
+                particles->pos(2, i) += meshField->shape(2);
             }
-            ensemble->pos(2, i) = meshField->topology(2, 0) +
-                    fmod(ensemble->pos(2, i), meshField->shape(2));
+            particles->pos(2, i) = meshField->topology(2, 0) +
+                    fmod(particles->pos(2, i), meshField->shape(2));
 
 #endif
         }
@@ -81,11 +81,11 @@ public:
         double m;
         for (uint i = 0; i < IGNIS_N; ++i) {
 
-            m = ensemble->masses(i%ensemble->nSpecies);
+            m = particles->masses(i%particles->nSpecies());
 
             for (uint k = 0; k < IGNIS_DIM; ++k) {
-                ensemble->vel(k, i) += ensemble->forces(k, i)*dt/(2*m);
-                ensemble->pos(k, i) += ensemble->vel(k, i)*dt;
+                particles->vel(k, i) += particles->forces(k, i)*dt/(2*m);
+                particles->pos(k, i) += particles->vel(k, i)*dt;
             }
 
         }
@@ -107,9 +107,9 @@ public:
         double m;
         for (uint i = 0; i < IGNIS_N; ++i) {
 
-            m = ensemble->masses(i%ensemble->nSpecies);
+            m = particles->masses(i%particles->nSpecies());
             for (uint k = 0; k < IGNIS_DIM; ++k) {
-                ensemble->vel(k, i) += ensemble->forces(k, i)*dt/(2*m);
+                particles->vel(k, i) += particles->forces(k, i)*dt/(2*m);
             }
         }
     }
@@ -134,10 +134,10 @@ public:
     randomShuffle() : Event("shuffling") {}
 
     void execute() {
-        ensemble->pos.randu();
+        particles->pos.randu();
         for (uint i = 0; i < IGNIS_N; ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                ensemble->pos(j, i) = meshField->topology(j, 0) + ensemble->pos(j, i)*meshField->shape(j);
+                particles->pos(j, i) = meshField->topology(j, 0) + particles->pos(j, i)*meshField->shape(j);
             }
         }
     }
@@ -185,10 +185,10 @@ public:
         getGamma();
 
         for (const uint & i : meshField->getAtoms()) {
-            ensemble->vel(0, i) *= gamma;
-            ensemble->vel(1, i) *= gamma;
+            particles->vel(0, i) *= gamma;
+            particles->vel(1, i) *= gamma;
 #if IGNIS_DIM == 3
-            ensemble->vel(2, i) *= gamma;
+            particles->vel(2, i) *= gamma;
 #endif
         }
     }
@@ -271,7 +271,7 @@ public:
         meshField->stretchField(deltaL, xyz);
 
         for (uint i = 0; i < IGNIS_N; ++i) {
-            ensemble->pos(xyz, i) =  C*(1-localDelta) + localDelta*ensemble->pos(xyz, i);
+            particles->pos(xyz, i) =  C*(1-localDelta) + localDelta*particles->pos(xyz, i);
         }
 
     }
@@ -311,7 +311,7 @@ public:
         double localDelta = 1 - deltaL/(2*L);
 
         for (uint i = 0; i < IGNIS_N; ++i) {
-            ensemble->pos(xyz, i) =  C*(1-localDelta) + localDelta*ensemble->pos(xyz, i);
+            particles->pos(xyz, i) =  C*(1-localDelta) + localDelta*particles->pos(xyz, i);
         }
 
     }
@@ -370,7 +370,7 @@ protected:
 
         double scale = pow(vNew/vPrev, 1.0/IGNIS_DIM);
         for (const uint & i : meshField->getAtoms()) {
-            ensemble->pos.col(i) *= scale;
+            particles->pos.col(i) *= scale;
         }
     }
 
@@ -384,7 +384,7 @@ public:
 
     void execute() {
         if ((*loopCycle % freq) == 0) {
-            scaledPos = ensemble->pos;
+            scaledPos = particles->pos;
             scaledPos.row(0)/=meshField->shape(0);
             scaledPos.row(1)/=meshField->shape(1);
             scaledPos.save((path + "/mdPos") + (toStr(*loopCycle) + ".arma"));
@@ -505,8 +505,8 @@ public:
         topology1(xyz, 1) = topology1(xyz, 0) + meshField->shape(xyz)/2;
         topology2(xyz, 0) = topology1(xyz, 1);
 
-        box1 = new MeshField(topology1, *ensemble, "Method of Planes 1. field");
-        box2 = new MeshField(topology2, *ensemble, "Method of Planes 2. field");
+        box1 = new MeshField(topology1, *particles, "Method of Planes 1. field");
+        box2 = new MeshField(topology2, *particles, "Method of Planes 2. field");
 
         meshField->addSubField(*box1);
         meshField->addSubField(*box2);
@@ -527,7 +527,7 @@ public:
 
         for (const uint & i : box1->getAtoms()) {
             for (const uint & j : box2->getAtoms()) {
-                planeForce += ensemble->forceVectors(i, j, xyz);
+                planeForce += particles->forceVectors(i, j, xyz);
             }
         }
 
@@ -583,7 +583,7 @@ public:
     checkMomentumConservation() : Event("momentumConservation", "", true) {}
 
     void execute() {
-        vec p = gears::getTotalLinearMomentum(ensemble);
+        vec p = gears::getTotalLinearMomentum(particles);
 
         setValue(as_scalar(sum(p)));
     }
@@ -597,7 +597,7 @@ public:
     diffusionConstant(double dt) : Event("DiffusionConstant", "D0", true), fac(dt/(IGNIS_DIM)), D(0) {}
 
     void initialize() {
-        v0 = ensemble->vel;
+        v0 = particles->vel;
     }
 
     void execute() {
@@ -606,7 +606,7 @@ public:
 
         for (const uint & i : meshField->getAtoms()) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                dD += v0(j, i)*ensemble->vel(j, i);
+                dD += v0(j, i)*particles->vel(j, i);
             }
         }
 

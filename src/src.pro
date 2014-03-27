@@ -21,7 +21,7 @@ SOURCES += MeshField/meshfield.cpp \
 
 HEADERS += \
     defines.h \
-    Ensemble/ensemble.h \
+    Particles/particles.h \
     MeshField/meshfield.h \
     Event/event.h \
     MeshField/MainMesh/mainmesh.h \

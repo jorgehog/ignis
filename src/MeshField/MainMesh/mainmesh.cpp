@@ -5,15 +5,15 @@
 
 #include "../../Event/event.h"
 #include "../../Event/intrinsicevents.h"
-#include "../../Ensemble/ensemble.h"
+#include "../../Particles/particles.h"
 
 #include <iomanip>
 
 using namespace ignis;
 
 
-MainMesh::MainMesh(const mat &topology, Ensemble & ensemble):
-    MeshField(topology, ensemble, "MainMesh"),
+MainMesh::MainMesh(const mat &topology, Particles & particles):
+    MeshField(topology, particles, "MainMesh"),
     m_silent(false),
     m_doFileIO(true)
 {

@@ -23,7 +23,7 @@ class MainMesh : public MeshField
 {
 
 public:
-    MainMesh(const mat & topology, Ensemble & ensemble);
+    MainMesh(const mat & topology, Particles & particles);
 
     uint getPopulation() const {
         return IGNIS_N;

@@ -15,7 +15,7 @@
 namespace ignis
 {
 
-struct Ensemble;
+struct Particles;
 
 class Event
 {
@@ -60,7 +60,7 @@ protected:
 
     MeshField* meshField;
 
-    Ensemble* ensemble;
+    Particles* particles;
 
 
     virtual void execute() = 0;
@@ -157,8 +157,8 @@ public:
         *(this->value) = value;
     }
 
-    void setEnsemble(Ensemble* ensemble){
-        this->ensemble = ensemble;
+    void setParticles(Particles* particles){
+        this->particles = particles;
     }
 
     void setMeshField(MeshField* meshField){

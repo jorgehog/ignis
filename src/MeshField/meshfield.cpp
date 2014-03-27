@@ -1,16 +1,16 @@
 #include "meshfield.h"
 
 #include <sstream>
-#include "../Ensemble/ensemble.h"
+#include "../Particles/particles.h"
 #include "../Event/event.h"
 
 using namespace ignis;
 
-MeshField::MeshField(const mat &topology, Ensemble &ensemble, const std::string description):
+MeshField::MeshField(const mat &topology, Particles &particles, const std::string description):
     volume(0),
     description(description)
 {
-    this->ensemble = &ensemble;
+    this->particles = &particles;
 
     setTopology(topology, false);
 
@@ -20,9 +20,9 @@ MeshField::MeshField(const mat &topology, Ensemble &ensemble, const std::string 
 bool MeshField::isWithinThis(uint i) {
 
     for (uint j = 0; j < IGNIS_DIM; ++j) {
-        if (ensemble->pos(j, i) < topology(j, 0)){
+        if (particles->pos(j, i) < topology(j, 0)){
             return false;
-        } else if (ensemble->pos(j, i) > topology(j, 1)) {
+        } else if (particles->pos(j, i) > topology(j, 1)) {
             return false;
         }
     }
@@ -200,7 +200,7 @@ void MeshField::addEvent(Event & event)
 
     event.setOutputVariables();
 
-    event.setEnsemble(ensemble);
+    event.setParticles(particles);
 
     events.push_back(&event);
 

@@ -5,7 +5,7 @@
 #include "defines.h"
 
 #include "MeshField/meshfield.h"
-#include "Ensemble/ensemble.h"
+#include "Particles/particles.h"
 
 #include <armadillo>
 
@@ -16,14 +16,14 @@ namespace ignis
 
 namespace gears {
 
-inline vec getTotalLinearMomentum(Ensemble* ensemble) {
+inline vec getTotalLinearMomentum(Particles* particles) {
 
     vec pTot = zeros<vec>(IGNIS_DIM);
 
-    //retrieve ensemble values;
-    const vec & masses = ensemble->masses;
-    mat & vel = ensemble->vel;
-    const uint & N = ensemble->nSpecies;
+    //retrieve particles values;
+    const vec & masses = particles->masses;
+    mat & vel = particles->vel;
+    const uint & N = particles->nSpecies();
 
     //Calculates total linear momentum
     for (uint k = 0; k < IGNIS_N; ++k) {
@@ -34,16 +34,16 @@ inline vec getTotalLinearMomentum(Ensemble* ensemble) {
 
 }
 
-inline void cancelLinearMomentum(Ensemble* ensemble)
+inline void cancelLinearMomentum(Particles* particles)
 {
 
 
-    //retrieve ensemble values;
-    const vec & masses = ensemble->masses;
-    mat & vel = ensemble->vel;
-    const uint & N = ensemble->nSpecies;
+    //retrieve particles values;
+    const vec & masses = particles->masses;
+    mat & vel = particles->vel;
+    const uint & N = particles->nSpecies();
 
-    vec pTot = getTotalLinearMomentum(ensemble);
+    vec pTot = getTotalLinearMomentum(particles);
 
     pTot /= IGNIS_N;
 
@@ -61,16 +61,16 @@ inline double getKineticEnergy(const MeshField * mf){
     double vVecSquared;
     double Ek = 0;
 
-    const Ensemble* ensemble = mf->getEnsemble();
+    const Particles* particles = mf->getParticles();
 
-    const vec & masses = ensemble->masses;
-    const uint & N = ensemble->nSpecies;
+    const vec & masses = particles->masses;
+    const uint & N = particles->nSpecies();
 
     for (const uint & k : mf->getAtoms()) {
-        vVecSquared = ensemble->vel(0, k)*ensemble->vel(0, k)
-                + ensemble->vel(1, k)*ensemble->vel(1, k);
+        vVecSquared = particles->vel(0, k)*particles->vel(0, k)
+                + particles->vel(1, k)*particles->vel(1, k);
 #if IGNIS_DIM == 3
-        vVecSquared += ensemble->vel(2, k)*ensemble->vel(2, k);
+        vVecSquared += particles->vel(2, k)*particles->vel(2, k);
 #endif
         Ek += masses(k%N)*vVecSquared;
     }

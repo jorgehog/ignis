@@ -2,7 +2,7 @@
 #define INTRINSICEVENTS_H
 
 #include "event.h"
-#include "../Ensemble/ensemble.h"
+#include "../Particles/particles.h"
 
 namespace ignis
 {
