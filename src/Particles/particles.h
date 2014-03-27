@@ -12,10 +12,10 @@ namespace ignis
 struct Particles
 {
 
-    mat::fixed<IGNIS_DIM, IGNIS_N> pos;
-    mat::fixed<IGNIS_DIM, IGNIS_N> vel;
-    mat::fixed<IGNIS_DIM, IGNIS_N> forces;
-    cube::fixed<IGNIS_N, IGNIS_N, IGNIS_DIM> forceVectors;
+    mat pos;
+    mat vel;
+    mat forces;
+    cube forceVectors;
 
     const vec masses;
 

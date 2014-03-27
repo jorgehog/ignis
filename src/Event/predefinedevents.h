@@ -32,7 +32,7 @@ public:
 
         using namespace std;
 #if defined (IGNIS_PERIODIC_X) || defined (IGNIS_PERIODIC_Y) || defined (IGNIS_PERIODIC_Z)
-        for (uint i = 0; i < IGNIS_N; ++i) {
+        for (uint i = 0; i < N(); ++i) {
 #ifdef IGNIS_PERIODIC_X
             if (particles->pos(0, i) < meshField->topology(0, 0)) {
                 particles->pos(0, i) += meshField->shape(0);
@@ -75,7 +75,8 @@ public:
     randomShuffle() : Event("shuffling") {}
 
     void execute() {
-        for (uint i = 0; i < IGNIS_N; ++i) {
+        cout << "fix me" << endl;
+        for (uint i = 0; i < 0; ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
                 particles->pos(j, i) = meshField->topology(j, 0) + drand48()*meshField->shape(j);
             }
@@ -100,7 +101,8 @@ public:
     countAtoms() : Event("Counting atoms", "", true) {}
 
     void execute(){
-        setValue((meshField->getPopulation()/double(IGNIS_N))/(meshField->volume));
+        cout << "fix me" << endl;
+        setValue((meshField->getPopulation()/double(1))/(meshField->volume));
     }
 
 };
@@ -124,7 +126,7 @@ public:
         ratio(ratio),
         recursive(recursive)
     {
-        assert(ratio > 0 && "RATIO CANNOT BE NEGATIVE");
+        assert(ratio > 0 && "RATIO CANOT BE NEGATIVE");
     }
 
     void initialize() {
@@ -177,10 +179,15 @@ public:
 
     void execute() {
         if ((*loopCycle % freq) == 0) {
+
+            cout << "fix me" << endl;
             scaledPos = particles->pos;
             scaledPos.row(0)/=meshField->shape(0);
             scaledPos.row(1)/=meshField->shape(1);
-            scaledPos.save((path + "/ignisPos") + (toStr(*loopCycle) + ".arma"));
+
+            stringstream s;
+            s << path << "/ignisPos" << *loopCycle << ".arma";
+            scaledPos.save(s.str());
         }
     }
 
@@ -189,7 +196,7 @@ private:
     std::string path;
     uint freq;
 
-    mat::fixed<IGNIS_DIM, IGNIS_N> scaledPos;
+    mat scaledPos;
 
 };
 

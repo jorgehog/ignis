@@ -26,7 +26,8 @@ public:
     MainMesh(const mat & topology, Particles & particles);
 
     uint getPopulation() const {
-        return IGNIS_N;
+        cout << "fix me " << endl;
+        return 0;
     }
 
     bool isMainMesh() const

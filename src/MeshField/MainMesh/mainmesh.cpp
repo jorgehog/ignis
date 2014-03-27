@@ -20,7 +20,8 @@ MainMesh::MainMesh(const mat &topology, Particles & particles):
 
     setOutputPath("/tmp/");
 
-    for (uint i = 0; i < IGNIS_N; ++i) {
+    cout << "fix me" << endl;
+    for (uint i = 0; i < 0; ++i) {
         atoms.push_back(i);
     }
 
@@ -34,7 +35,9 @@ void MainMesh::updateContainments()
         subField->resetSubFields();
     }
 
-    for (uint i = 0; i < IGNIS_N; ++i) {
+
+    cout << "fix me" << endl;
+    for (uint i = 0; i < 0; ++i) {
 
         for (MeshField* subField : subFields){
             (void)subField->checkSubFields(i);

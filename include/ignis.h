@@ -5,7 +5,7 @@
 #include "../src/MeshField/MainMesh/mainmesh.h"
 
 #include "../src/Event/event.h"
-#include "../src/Event/predefinedEvents/predefinedevents.h"
+#include "../src/Event/predefinedevents.h"
 #include "../src/gears.h"
 
 #ifdef USE_QT_GUI
