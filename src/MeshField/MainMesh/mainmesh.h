@@ -1,35 +1,35 @@
-#ifndef MAINMESH_H
-#define MAINMESH_H
+#pragma once
 
 #include "../meshfield.h"
 
 namespace ignis
 {
 
-struct LoopChunk
-{
+template<typename pT = double> class MainMesh;
 
-    uint start;
-    uint end;
-
-    std::vector<Event*> executeEvents;
-    std::vector<Event*> resetEvents;
-
-    LoopChunk(uint i, uint j) : start(i), end(j) {}
-
-};
-
-class MainMesh : public MeshField
+template<typename pT>
+class MainMesh : public MeshField<pT>
 {
 
 public:
-    MainMesh(const mat & topology, Particles & particles);
+
+    MainMesh(const Mat<pT> &topology);
 
     uint getPopulation() const;
 
     bool isMainMesh() const
     {
         return true;
+    }
+
+    static void setCurrentParticles(const PositionHandler<pT> &particles)
+    {
+        m_currentParticles = &particles;
+    }
+
+    static const PositionHandler<pT> & getCurrentParticles()
+    {
+        return *m_currentParticles;
     }
 
 
@@ -56,7 +56,7 @@ public:
 
 private:
 
-    void sendToTop(Event &event);
+    void sendToTop(Event<pT> &event);
 
 
     void addIntrinsicEvents();
@@ -71,17 +71,16 @@ private:
     void executeEvents();
 
 
-
     void updateContainments();
+
+
+    static const PositionHandler<pT> *m_currentParticles;
 
 
     std::string outputPath;
 
-    std::vector<Event*> allEvents;
+    std::vector<Event<pT> *> allEvents;
 
-    std::vector<LoopChunk*> allLoopChunks;
-
-    LoopChunk * currentChunk;
 
     void dumpLoopChunkInfo();
 
@@ -90,7 +89,60 @@ private:
     bool m_doFileIO;
 
 
+
+    struct LoopChunk
+    {
+
+        uint start;
+        uint end;
+
+        std::vector<Event<pT> *> executeEvents;
+        std::vector<Event<pT> *> resetEvents;
+
+        LoopChunk(uint i, uint j) : start(i), end(j) {}
+
+    };
+
+
+    std::vector<LoopChunk *> allLoopChunks;
+
+    LoopChunk * currentChunk;
+
+
+
+
+    class _dumpEvents : public Event<pT>
+    {
+    public:
+
+        _dumpEvents() : Event<pT>("INTRINSIC_EVENT_DUMP") {}
+
+        void execute()
+        {
+            dumpEvents();
+        }
+
+    } _stdout;
+
+    class _dumpEventsToFile : public Event<pT>
+    {
+    public:
+
+        _dumpEventsToFile() : Event<pT>("INTRINSIC_EVENT_FILEDUMP") {}
+
+        void initialize()
+        {
+            Event<pT>::initializeEventMatrix();
+        }
+
+        void execute()
+        {
+            dumpEventsToFile();
+        }
+
+    } _fileio;
+
+
+
 };
 }
-
-#endif // MAINMESH_H

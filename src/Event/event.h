@@ -1,5 +1,4 @@
-#ifndef EVENT_H
-#define EVENT_H
+#pragma once
 
 
 #include "../defines.h"
@@ -15,71 +14,12 @@
 namespace ignis
 {
 
-struct Particles;
-
 template<typename pT>
 class PositionHandler;
 
-//template<typename pT>
+template<typename pT, class pT2>
 class Event
 {
-protected:
-
-    static uint N;
-
-    static const uint *loopCycle;
-
-
-    std::string type;
-
-
-    static std::vector<std::string> outputTypes;
-
-
-    static uint priorityCounter;
-
-    uint priority;
-
-    uint address; //! This event's index in meshfield's event array
-
-
-    static uint toFileCounter;
-
-    static uint totalCounter;
-
-    uint id;
-
-    double* value;
-
-    bool valueInitialized;
-
-    bool doOutput;
-
-    bool toFile;
-
-    std::string unit;
-
-    static mat observables;
-
-
-    MeshField *meshField;
-
-    Particles* particles;
-
-    PositionHandler<double> *positions;
-
-
-    virtual void execute() = 0;
-
-    uint nTimesExecuted;
-
-    bool m_initialized;
-
-
-    uint onsetTime = IGNIS_UNSET_UINT;
-
-    uint offsetTime = IGNIS_UNSET_UINT;
-
 public:
 
     Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
@@ -161,34 +101,32 @@ public:
         *(this->value) = value;
     }
 
-    void setParticles(Particles* particles){
-        this->particles = particles;
-    }
-
-    void setMeshField(MeshField* meshField){
+    void setMeshField(MeshField<pT> *meshField)
+    {
         this->meshField = meshField;
     }
 
     static void setNumberOfCycles(uint & N){
-        Event::N = N;
+        Event<pT>::nCycles = N;
     }
 
     static void setLoopCyclePtr(const uint* loopCycle){
-        Event::loopCycle = loopCycle;
+        Event<pT>::loopCycle = loopCycle;
     }
 
     void setAddress(uint i) {
         address = i;
     }
 
-    void setExplicitTimes() {
+    void setExplicitTimes()
+    {
 
         if (onsetTime == IGNIS_UNSET_UINT) {
             setOnsetTime(0);
         }
 
         if (offsetTime == IGNIS_UNSET_UINT) {
-            setOffsetTime(N-1);
+            setOffsetTime(nCycles-1);
         }
 
     }
@@ -199,25 +137,30 @@ public:
 
     void setOutputVariables();
 
-    static void initializeEventMatrix() {
-        assert(N!=0 && "Unset or empty number of cycles");
+    static void initializeEventMatrix()
+    {
+        assert(nCycles!=0 && "Unset or empty number of cycles");
 
-        observables.zeros(N, getCounter());
+        observables.zeros(nCycles, getCounter());
     }
 
-    static void dumpEventMatrixData(uint k) {
-        for (uint i = 0; i < getCounter(); ++i) {
+    static void dumpEventMatrixData(uint k)
+    {
+        for (uint i = 0; i < getCounter(); ++i)
+        {
             cout << std::setw(30) << std::left << outputTypes.at(i) << "  " << std::setw(10) << observables(k, i) << endl;
         }
     }
 
-    static void saveEventMatrix(std::string path) {
+    static void saveEventMatrix(std::string path)
+    {
         observables.save(path);
     }
 
     std::string dumpString();
 
-    void setOnsetTime(uint onsetTime){
+    void setOnsetTime(uint onsetTime)
+    {
 
         if (onsetTime == IGNIS_UNSET_UINT) return;
 
@@ -225,7 +168,8 @@ public:
 
     }
 
-    void setOffsetTime(uint offTime) {
+    void setOffsetTime(uint offTime)
+    {
 
         if (offTime == IGNIS_UNSET_UINT) return;
 
@@ -239,27 +183,92 @@ public:
 
     }
 
-    void setTrigger(uint t){
+    void setTrigger(uint t)
+    {
 
         setOnsetTime(t);
         setOffsetTime(t);
 
     }
 
-    bool _hasExecuteImpl() {
+    bool _hasExecuteImpl()
+    {
         //        return (&this->execute != &Event::execute);
         return true;
     }
 
-    bool _hasResetImpl() {
+    bool _hasResetImpl()
+    {
         //        return (&this->reset != &Event::reset);
         return true;
     }
 
     uint eventLength = IGNIS_UNSET_UINT;
 
+
+protected:
+
+    static uint nCycles;
+
+    static const uint *loopCycle;
+
+
+    std::string type;
+
+
+    static std::vector<std::string> outputTypes;
+
+
+    static uint priorityCounter;
+
+    uint priority;
+
+    uint address; //! This event's index in meshfield's event array
+
+
+    static uint toFileCounter;
+
+    static uint totalCounter;
+
+    uint id;
+
+    double* value;
+
+    bool valueInitialized;
+
+    bool doOutput;
+
+    bool toFile;
+
+    std::string unit;
+
+    static mat observables;
+
+
+    MeshField<pT> *meshField;
+
+
+
+    virtual void execute() = 0;
+
+    uint nTimesExecuted;
+
+    bool m_initialized;
+
+
+    uint onsetTime = IGNIS_UNSET_UINT;
+
+    uint offsetTime = IGNIS_UNSET_UINT;
+
+    pT2 & particles()
+    {
+        return static_cast<pT2>(m_particles);
+    }
+
+private:
+
+    PositionHandler<pT> & m_particles;
+
 };
 
 }
-
-#endif // EVENT_H

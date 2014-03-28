@@ -8,6 +8,10 @@ namespace ignis
 template<typename pT>
 class PositionHandler
 {
+
+    typedef typename arma::Col<pT>::template fixed<IGNIS_DIM> colType;
+
+
 public:
 
 
@@ -23,17 +27,17 @@ public:
         return at(n, d);
     }
 
-    arma::Col<pT> &operator()(const uint n) const
+    colType &operator()(const uint n) const
     {
-        pT *aux_mem[IGNIS_DIM];
+        colType* _col = new colType;
 
-        aux_mem[0] = this->at(n, 0);
-        aux_mem[1] = this->at(n, 1);
+        _col->memptr()[0] = this->at(n, 0);
+        _col->memptr()[1] = this->at(n, 1);
 #if INGIS_DIM == 3
-        aux_mem[2] = this->at(n, 2);
+        _col->memptr()[2] = this->at(n, 2);
 #endif
 
-        return arma::Col<pT>::fixed<IGNIS_DIM>(aux_mem, false, true);
+        return *_col;
 
     }
 

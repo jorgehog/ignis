@@ -2,7 +2,6 @@
 
 #include "../src/defines.h"
 
-#include "../src/Particles/particles.h"
 #include "../src/MeshField/meshfield.h"
 #include "../src/MeshField/MainMesh/mainmesh.h"
 

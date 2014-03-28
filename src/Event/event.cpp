@@ -4,13 +4,15 @@
 
 #include "../positionhandler.h"
 
+#include "../MeshField/MainMesh/mainmesh.h"
+
 #include <sstream>
 #include <iomanip>
 
 using namespace ignis;
 
-
-Event::Event(std::string type, std::string unit, bool doOutput, bool toFile):
+template<typename pT, class pT2>
+Event<pT, pT2>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
     type(type),
     priority(IGNIS_UNSET_UINT),
     value(new double(0)),
@@ -18,24 +20,27 @@ Event::Event(std::string type, std::string unit, bool doOutput, bool toFile):
     doOutput(doOutput),
     toFile(toFile),
     unit(unit),
+    m_particles(MainMesh<pT>::getCurrentParticles()),
     nTimesExecuted(0),
     m_initialized(false)
 {
-    cout << "TMP: replace particles with positions (deduce type)" << endl;
-    positions = new DummyHandler<double>;
     totalCounter++;
 }
 
-void Event::storeEvent()
+
+template<typename pT, class pT2>
+void Event<pT, pT2>::storeEvent()
 {
     if (!toFile) {
         return;
     }
+
     observables(*loopCycle, id) = *value;
 
 }
 
-void Event::setOutputVariables()
+template<typename pT, class pT2>
+void Event<pT, pT2>::setOutputVariables()
 {
     if (toFile) {
         id = toFileCounter++;
@@ -43,7 +48,8 @@ void Event::setOutputVariables()
     }
 }
 
-void Event::setPriority()
+template<typename pT, class pT2>
+void Event<pT, pT2>::setPriority()
 {
 
     if (priority == IGNIS_UNSET_UINT)
@@ -55,7 +61,8 @@ void Event::setPriority()
 
 }
 
-void Event::setManualPriority(uint p)
+template<typename pT, class pT2>
+void Event<pT, pT2>::setManualPriority(uint p)
 {
     if (p == IGNIS_UNSET_UINT)
     {
@@ -70,7 +77,8 @@ void Event::setManualPriority(uint p)
 }
 
 
-std::string Event::dumpString()
+template<typename pT, class pT2>
+std::string Event<pT, pT2>::dumpString()
 {
     using namespace std;
 
@@ -97,14 +105,23 @@ std::string Event::dumpString()
    Static member variables:
 */
 
-const uint * Event::loopCycle;
+template<typename pT, class pT2>
+const uint * Event<pT, pT2>::loopCycle;
 
-std::vector<std::string> Event::outputTypes;
+template<typename pT, class pT2>
+std::vector<std::string> Event<pT, pT2>::outputTypes;
 
-mat Event::observables;
+template<typename pT, class pT2>
+mat Event<pT, pT2>::observables;
 
-uint Event::N = 0;
+template<typename pT, class pT2>
+uint Event<pT, pT2>::nCycles = 0;
 
-uint Event::totalCounter = 0;
-uint Event::toFileCounter = 0;
-uint Event::priorityCounter = 0;
+template<typename pT, class pT2>
+uint Event<pT, pT2>::totalCounter = 0;
+
+template<typename pT, class pT2>
+uint Event<pT, pT2>::toFileCounter = 0;
+
+template<typename pT, class pT2>
+uint Event<pT, pT2>::priorityCounter = 0;

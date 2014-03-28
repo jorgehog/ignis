@@ -1,5 +1,4 @@
-#ifndef MD_MESHFIELD_H
-#define MD_MESHFIELD_H
+#pragma once
 
 
 #include "../defines.h"
@@ -16,35 +15,116 @@ using namespace arma;
 namespace ignis
 {
 
-struct Particles;
-
 template<typename pT>
 class PositionHandler;
 
+template<typename pT = double, class pT2 = PositionHandler<pT> >
 class Event;
 
+template<typename pT>
 class MainMesh;
 
-//template<typename pT>
+template<typename pT>
 class MeshField
 {
 
+public:
+
+    MeshField(const Mat<pT> & topology, const std::string description = "meshField");
+
+
+    const pT volume;
+
+    const typename Mat<pT>::template fixed<IGNIS_DIM, 2> topology;
+
+    const typename Col<pT>::template fixed<IGNIS_DIM> shape;
+
+    void setTopology(const Mat<pT> &topology, bool recursive=true);
+
+
+    const std::string description;
+
+
+    virtual bool isMainMesh () const
+    {
+        return false;
+    }
+
+    void setParent(MeshField<pT> *parent)
+    {
+        this->parent = parent;
+    }
+
+    MeshField<pT> *getParent ()
+    {
+        return parent;
+    }
+
+
+    virtual bool isWithinThis(uint i);
+
+    void addEvent(Event<pT> & event);
+
+    void removeEvent(uint i);
+
+    void addSubField(MeshField &subField);
+
+    void removeSubField(uint i)
+    {
+        subFields.erase(subFields.begin() + i);
+    }
+
+
+    void stretchField(double l, uint xyz);
+
+    void scaleField(const Col<pT> &oldShape, const Mat<pT> &oldTopology, const Mat<pT> &newTopology);
+
+
+    virtual uint getPopulation() const
+    {
+        return atoms.size();
+    }
+
+    const std::vector<uint> & getAtoms() const
+    {
+        return atoms;
+    }
+
+    const PositionHandler<double> & getParticles () const
+    {
+        return particles;
+    }
+
+
+    const std::vector<MeshField*> & getSubfields() const
+    {
+        return subFields;
+    }
+
+    const std::vector<Event<pT> *> & getEvents() const
+    {
+        return events;
+    }
+
+
+    friend class MainMesh<pT>;
+    friend class ContractMesh;
+    friend class ExpandMesh;
+
 protected:
 
-    MeshField* parent;
+    MeshField<pT> *parent;
 
-    Particles *particles;
-
-    PositionHandler<double> *positions;
+    const PositionHandler<pT> &particles;
 
     std::vector<uint> atoms;
 
-    std::vector<Event*> events;
+    std::vector<Event<pT>* > events;
 
-    std::vector<MeshField*> subFields;
+    std::vector<MeshField<pT>* > subFields;
 
 
-    virtual void sendToTop(Event & event);
+    void sendToTop(Event<pT> & event);
 
 
     //This should be executed from the MainMesh,
@@ -56,93 +136,16 @@ protected:
     bool checkSubFields(uint i);
 
 
-    bool notCompatible(MeshField & subField);
+    bool notCompatible(MeshField<pT> & subField);
 
 
     void resetSubFields();
 
-    void resetContents(){
+    void resetContents()
+    {
         atoms.clear();
     }
-
-public:
-
-    MeshField(const mat & topology, Particles &particles,
-              const std::string description = "meshField");
-
-
-    const double volume;
-
-    const mat::fixed<IGNIS_DIM, 2> topology;
-
-    const vec::fixed<IGNIS_DIM> shape;
-
-    void setTopology(const mat & topology, bool recursive=true);
-
-
-    const std::string description;
-
-
-    virtual bool isMainMesh () const
-    {
-        return false;
-    }
-
-    void setParent(MeshField* parent) {
-        this->parent = parent;
-    }
-
-    MeshField* getParent () {
-        return parent;
-    }
-
-
-    virtual bool isWithinThis(uint i);
-
-    void addEvent(Event & event);
-
-    void removeEvent(uint i);
-
-    void addSubField(MeshField &subField);
-
-    void removeSubField(uint i){
-        subFields.erase(subFields.begin() + i);
-    }
-
-
-    void stretchField(double l, uint xyz);
-
-    void scaleField(const vec & oldShape, const mat &oldTopology, const mat &newTopology);
-
-
-    virtual uint getPopulation() const {
-        return atoms.size();
-    }
-
-    const std::vector<uint> & getAtoms() const {
-        return atoms;
-    }
-
-    const Particles * getParticles () const {
-        return particles;
-    }
-
-
-    const std::vector<MeshField*> & getSubfields() const {
-        return subFields;
-    }
-
-    const std::vector<Event*> & getEvents() const {
-        return events;
-    }
-
-
-    friend class MainMesh;
-    friend class ContractMesh;
-    friend class ExpandMesh;
 
 };
 }
 
-
-#endif // MD_MESHFIELD_H

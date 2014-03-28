@@ -3,12 +3,9 @@
 
 #include <assert.h>
 
-#include "../../Particles/particles.h"
-
 #include "../../positionhandler.h"
 
 #include "../../Event/event.h"
-#include "../../Event/intrinsicevents.h"
 
 
 
@@ -17,36 +14,41 @@
 using namespace ignis;
 
 
-MainMesh::MainMesh(const mat &topology, Particles & particles):
-    MeshField(topology, particles, "MainMesh"),
+template<typename pT>
+MainMesh<pT>::MainMesh(const Mat<pT> &topology):
+    MeshField<pT>(topology, "MainMesh"),
     m_silent(false),
     m_doFileIO(true)
 {
 
     setOutputPath("/tmp/");
 
-    for (uint i = 0; i < positions->count(); ++i) {
-        atoms.push_back(i);
+    for (uint i = 0; i < MeshField<pT>::particles.count(); ++i)
+    {
+        this->atoms.push_back(i);
     }
 
 }
 
-uint MainMesh::getPopulation() const
+template<typename pT>
+uint MainMesh<pT>::getPopulation() const
 {
-    return positions->count();
+    return this->particles.count();
 }
 
-
-void MainMesh::updateContainments()
+template<typename pT>
+void MainMesh<pT>::updateContainments()
 {
 
-    for (MeshField* subField : subFields){
+    for (MeshField<pT> *subField : MeshField<pT>::subFields)
+    {
         subField->resetSubFields();
     }
 
-    for (uint i = 0; i < positions->count(); ++i) {
+    for (uint i = 0; i < MeshField<pT>::particles.count(); ++i)
+    {
 
-        for (MeshField* subField : subFields)
+        for (MeshField<pT> *subField : MeshField<pT>::subFields)
         {
             (void)subField->checkSubFields(i);
         }
@@ -55,7 +57,8 @@ void MainMesh::updateContainments()
 
 }
 
-void MainMesh::dumpLoopChunkInfo()
+template<typename pT>
+void MainMesh<pT>::dumpLoopChunkInfo()
 {
 
     using namespace std;
@@ -64,7 +67,7 @@ void MainMesh::dumpLoopChunkInfo()
 
         cout << "Loopchunk interval: [" << loopChunk->start << " " << loopChunk->end << "]" << endl;
         cout << "has " << loopChunk->executeEvents.size() << " events: " << endl;
-        for (Event* event : loopChunk->executeEvents) {
+        for (Event<pT>* event : loopChunk->executeEvents) {
             cout << "  " << setw(2) << right << event->getPriority() << "  "
                  << setw(30) << left << event->getType()
                  << "["
@@ -77,28 +80,31 @@ void MainMesh::dumpLoopChunkInfo()
     }
 }
 
-void MainMesh::dumpEventsToFile() const
+template<typename pT>
+void MainMesh<pT>::dumpEventsToFile() const
 {
 
-    for (Event* event: currentChunk->executeEvents) {
+    for (Event<pT>* event: currentChunk->executeEvents)
+    {
         event->storeEvent();
     }
 
-    Event::saveEventMatrix(outputPath);
+    Event<pT>::saveEventMatrix(outputPath);
 }
 
 
-void MainMesh::eventLoop(uint N)
+template<typename pT>
+void MainMesh<pT>::eventLoop(uint N)
 {
 
     addIntrinsicEvents();
 
     uint* loopCycle = new uint(0);
 
-    Event::setNumberOfCycles(N);
-    Event::setLoopCyclePtr(loopCycle);
+    Event<pT>::setNumberOfCycles(N);
+    Event<pT>::setLoopCyclePtr(loopCycle);
 
-    prepareEvents();
+    this->prepareEvents();
 
     sortEvents();
 
@@ -122,7 +128,8 @@ void MainMesh::eventLoop(uint N)
 
 }
 
-void MainMesh::setOutputPath(std::string path)
+template<typename pT>
+void MainMesh<pT>::setOutputPath(std::string path)
 {
     if (strcmp(&path.back(), "/") != 0){
         path = path + "/";
@@ -131,40 +138,43 @@ void MainMesh::setOutputPath(std::string path)
     outputPath = path + "mdEventsOut.arma";
 }
 
-void MainMesh::sendToTop(Event &event)
+template<typename pT>
+void MainMesh<pT>::sendToTop(Event<pT> &event)
 {
     allEvents.push_back(&event);
 }
 
-void MainMesh::addIntrinsicEvents()
+template<typename pT>
+void MainMesh<pT>::addIntrinsicEvents()
 {
 
     if (!m_silent)
     {
-        Event *_stdout = new _dumpEvents(this);
         _stdout->setManualPriority();
-        addEvent(*_stdout);
+        addEvent(_stdout);
     }
 
     if (!m_doFileIO)
     {
-        Event *_fileio = new _dumpEventsToFile(this);
         _fileio->setManualPriority();
-        addEvent(*_fileio);
+        addEvent(_fileio);
     }
 
 }
 
-void MainMesh::sortEvents()
+template<typename pT>
+void MainMesh<pT>::sortEvents()
 {
     std::sort(allEvents.begin(),
               allEvents.end(),
-              [] (const Event *e1, const Event *e2) {return e1->getPriority() < e2->getPriority();});
+              [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->getPriority() < e2->getPriority();});
 }
 
-void MainMesh::initializeNewEvents()
+
+template<typename pT>
+void MainMesh<pT>::initializeNewEvents()
 {
-    for (Event* event : currentChunk->executeEvents) {
+    for (Event<pT>* event : currentChunk->executeEvents) {
 
         if (!event->initialized())
         {
@@ -173,16 +183,18 @@ void MainMesh::initializeNewEvents()
     }
 }
 
-void MainMesh::setupChunks()
+
+template<typename pT>
+void MainMesh<pT>::setupChunks()
 {
 
-    uvec onsetTimes(Event::getTotalCounter());
-    uvec offsetTimes(Event::getTotalCounter());
+    uvec onsetTimes(Event<pT>::getTotalCounter());
+    uvec offsetTimes(Event<pT>::getTotalCounter());
 
-    assert(Event::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
+    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
-    for (Event* event : allEvents) {
+    for (Event<pT>* event : allEvents) {
         onsetTimes(k) = event->getOnsetTime();
         offsetTimes(k) = event->getOffsetTime();
         k++;
@@ -250,7 +262,7 @@ void MainMesh::setupChunks()
 
 
 
-    for (Event* event : allEvents) {
+    for (Event<pT>* event : allEvents) {
         for (LoopChunk* loopChunk : allLoopChunks) {
             if (event->getOnsetTime() <= loopChunk->start && event->getOffsetTime() >= loopChunk->end) {
 
@@ -270,23 +282,26 @@ void MainMesh::setupChunks()
 
 }
 
-void MainMesh::executeEvents()
+
+template<typename pT>
+void MainMesh<pT>::executeEvents()
 {
 
-    for (Event * event : currentChunk->executeEvents) {
+    for (Event<pT> * event : currentChunk->executeEvents) {
         event->executeEvent();
     }
 
-    for (Event * event : currentChunk->executeEvents) {
+    for (Event<pT> * event : currentChunk->executeEvents) {
         event->reset();
     }
 
 }
 
-void MainMesh::dumpEvents() const
+template<typename pT>
+void MainMesh<pT>::dumpEvents() const
 {
 
-    for (Event* event : currentChunk->executeEvents)
+    for (Event<pT>* event : currentChunk->executeEvents)
     {
         if (event->notSilent())
         {
@@ -299,3 +314,5 @@ void MainMesh::dumpEvents() const
 
 
 
+template<typename pT>
+const PositionHandler<pT> *MainMesh<pT>::m_currentParticles;

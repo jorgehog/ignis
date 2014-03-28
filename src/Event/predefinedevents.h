@@ -23,10 +23,11 @@
 namespace ignis
 {
 
-class periodicScaling : public Event {
+template<typename pT>
+class periodicScaling : public Event<pT> {
 public:
 
-    periodicScaling() : Event("PeriodicRescale") {}
+    periodicScaling() : Event<pT>("PeriodicRescale") {}
 
 
     //Hey, what I mean to say is that I rescale all positions to fit the mesh _if_ they are set to
@@ -38,25 +39,25 @@ public:
 #if defined (IGNIS_PERIODIC_X) || defined (IGNIS_PERIODIC_Y) || defined (IGNIS_PERIODIC_Z)
         for (uint i = 0; i < N(); ++i) {
 #ifdef IGNIS_PERIODIC_X
-            if (particles->pos(0, i) < meshField->topology(0, 0)) {
-                particles->pos(0, i) += meshField->shape(0);
+            if (positions(0, i) < meshField->topology(0, 0)) {
+                positions(0, i) += meshField->shape(0);
             }
-            particles->pos(0, i) = meshField->topology(0, 0) +
-                    fmod(particles->pos(0, i) - meshField->topology(0, 0), meshField->shape(0));
+            positions(0, i) = meshField->topology(0, 0) +
+                    fmod(positions(0, i) - meshField->topology(0, 0), meshField->shape(0));
 #endif
 #ifdef IGNIS_PERIODIC_Y
-            if (particles->pos(1, i) < meshField->topology(1, 0)) {
-                particles->pos(1, i) += meshField->shape(1);
+            if (positions(1, i) < meshField->topology(1, 0)) {
+                positions(1, i) += meshField->shape(1);
             }
-            particles->pos(1, i) = meshField->topology(1, 0) +
-                    fmod(particles->pos(1, i) - meshField->topology(1, 0), meshField->shape(1));
+            positions(1, i) = meshField->topology(1, 0) +
+                    fmod(positions(1, i) - meshField->topology(1, 0), meshField->shape(1));
 #endif
 #ifdef IGNIS_PERIODIC_Z
-            if (particles->pos(2, i) < meshField->topology(2, 0)) {
-                particles->pos(2, i) += meshField->shape(2);
+            if (positions(2, i) < meshField->topology(2, 0)) {
+                positions(2, i) += meshField->shape(2);
             }
-            particles->pos(2, i) = meshField->topology(2, 0) +
-                    fmod(particles->pos(2, i), meshField->shape(2));
+            positions(2, i) = meshField->topology(2, 0) +
+                    fmod(positions(2, i), meshField->shape(2));
 
 #endif
         }
@@ -74,15 +75,16 @@ public:
  */
 
 
-class randomShuffle : public Event {
+template<typename pT>
+class randomShuffle : public Event<pT> {
 public:
-    randomShuffle() : Event("shuffling") {}
+    randomShuffle() : Event<pT>("shuffling") {}
 
     void execute() {
 
-        for (uint i = 0; i < positions->count(); ++i) {
+        for (uint i = 0; i < Event<pT>::particles().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                particles->pos(j, i) = meshField->topology(j, 0) + drand48()*meshField->shape(j);
+                Event<pT>::particles()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
             }
         }
     }
@@ -99,33 +101,37 @@ public:
  */
 
 
-class countAtoms : public Event{
+class countAtoms : public Event<>
+{
 public:
 
-    countAtoms() : Event("Counting atoms", "", true) {}
+    countAtoms() : Event<>("Counting atoms", "", true) {}
 
     void execute(){
-        setValue((meshField->getPopulation()/double(positions->count()))/(meshField->volume));
+        setValue((Event<>::meshField->getPopulation()/double(Event<>::particles().count()))/(Event<>::meshField->volume));
     }
 
 };
 
-class ReportProgress : public Event {
+class ReportProgress : public Event<>
+{
 public:
 
-    ReportProgress() : Event("Progress", "%", true) {}
+    ReportProgress() : Event<>("Progress", "%", true) {}
 
     void execute() {
-        setValue(*loopCycle*100.0/N);
+        setValue(*loopCycle*100.0/nCycles);
     }
 };
 
 
-class VolumeChange : public Event {
+template<typename pT>
+class VolumeChange : public Event <pT>
+{
 public:
 
     VolumeChange(double ratio, bool recursive) :
-        Event("VolumeChange"),
+        Event<pT>("VolumeChange"),
         ratio(ratio),
         recursive(recursive)
     {
@@ -134,10 +140,10 @@ public:
 
     void initialize() {
 
-        topology0 = meshField->topology;
-        volume0 = meshField->volume;
+        topology0 = Event<pT>::meshField->topology;
+        volume0   = Event<pT>::meshField->volume;
 
-        k = (pow(ratio, 1.0/IGNIS_DIM) - 1)/eventLength;
+        k = (pow(ratio, 1.0/IGNIS_DIM) - 1)/Event<pT>::eventLength;
 
     }
 
@@ -148,47 +154,48 @@ private:
 
     bool recursive;
 
-    mat topology0;
-    double volume0;
+    Mat<pT> topology0;
+    pT volume0;
 
     // Event interface
 protected:
     void execute() {
 
-        double vPrev = meshField->volume;
+        double vPrev = Event<pT>::meshField->volume;
         assert(vPrev != 0 && "Can't increase volume of empty volume.(V=0)");
 
-        double dL = k*(nTimesExecuted + 1.0);
-        mat newTopology = topology0*(1 + dL);
+        double dL = k*(Event<pT>::nTimesExecuted + 1.0);
+        Mat<pT> newTopology = topology0*(1 + dL);
 
-        meshField->setTopology(newTopology, recursive);
+        Event<pT>::meshField->setTopology(newTopology, recursive);
 
-        double vNew = meshField->volume;
+        pT vNew = Event<pT>::meshField->volume;
         assert(vNew != 0 && "Volume changed to zero");
 
-        double scale = pow(vNew/vPrev, 1.0/IGNIS_DIM);
-        for (const uint & i : meshField->getAtoms()) {
-            particles->pos.col(i) *= scale;
+        pT scale = (pT)pow(vNew/(double)vPrev, 1.0/IGNIS_DIM);
+        for (const uint & i : Event<pT>::meshField->getAtoms()) {
+            Event<pT>::particles()(i) *= scale;
         }
     }
 
 };
 
 
-class SaveToFile : public Event {
+template<typename pT>
+class SaveToFile : public Event<pT> {
 public:
 
-    SaveToFile(std::string path, uint freq) : Event("SaveData"), path(path), freq(freq) {}
+    SaveToFile(std::string path, uint freq) : Event<pT>("SaveData"), path(path), freq(freq) {}
 
     void execute() {
-        if ((*loopCycle % freq) == 0) {
+        if ((*Event<pT>::loopCycle % freq) == 0) {
 
-            scaledPos = *positions;
-            scaledPos.row(0)/=meshField->shape(0);
-            scaledPos.row(1)/=meshField->shape(1);
+            scaledPos = Event<pT>::particles();
+            scaledPos.row(0)/=Event<pT>::meshField->shape(0);
+            scaledPos.row(1)/=Event<pT>::meshField->shape(1);
 
             std::stringstream s;
-            s << path << "/ignisPos" << *loopCycle << ".arma";
+            s << path << "/ignisPos" << *Event<pT>::loopCycle << ".arma";
             scaledPos.save(s.str());
         }
     }
@@ -198,7 +205,7 @@ private:
     std::string path;
     uint freq;
 
-    mat scaledPos;
+    Mat<pT> scaledPos;
 
 };
 
@@ -224,10 +231,13 @@ private:
 };
 #endif
 
-class killMe : public Event {
+class killMe : public Event<> {
 public:
 
-    killMe(uint when) : Event() {setTrigger(when);}
+    killMe(uint when) : Event<>()
+    {
+        setTrigger(when);
+    }
 
     void execute() {
         exit(1);
@@ -236,10 +246,10 @@ public:
 };
 
 
-class stall : public Event {
+class stall : public Event<> {
 public:
 
-    stall(double dt) : Event("Stall"), dt(dt) {}
+    stall(double dt) : Event<>("Stall"), dt(dt) {}
 
     void execute() {
         usleep(dt*1E6);
@@ -250,13 +260,13 @@ private:
 };
 
 
-class density : public Event {
+class density : public Event<> {
 public:
 
-    density() : Event("Density", "", true, true) {}
+    density() : Event<>("Density", "", true, true) {}
 
     void execute() {
-        setValue(meshField->getPopulation()/meshField->volume);
+        setValue(meshField->getPopulation()/(double)meshField->volume);
     }
 
 };

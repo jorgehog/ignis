@@ -1,33 +1,30 @@
 #include "meshfield.h"
 
+#include "MainMesh/mainmesh.h"
+
 #include <sstream>
-#include "../Particles/particles.h"
 #include "../positionhandler.h"
 #include "../Event/event.h"
 
 using namespace ignis;
 
-MeshField::MeshField(const mat &topology, Particles &particles, const std::string description):
+template<typename pT>
+MeshField<pT>::MeshField(const Mat<pT> &topology, const std::string description):
+    particles(MainMesh<pT>::getCurrentParticles()),
     volume(0),
     description(description)
 {
-
-    cout << "TMP: replace particles with positions (deduce type)" << endl;
-    positions = new DummyHandler<double>();
-
-    this->particles = &particles;
-
     setTopology(topology, false);
-
 }
 
 
-bool MeshField::isWithinThis(uint i) {
+template<typename pT>
+bool MeshField<pT>::isWithinThis(uint i) {
 
     for (uint j = 0; j < IGNIS_DIM; ++j) {
-        if (particles->pos(j, i) < topology(j, 0)){
+        if (particles(j, i) < topology(j, 0)){
             return false;
-        } else if (particles->pos(j, i) > topology(j, 1)) {
+        } else if (particles(j, i) > topology(j, 1)) {
             return false;
         }
     }
@@ -36,29 +33,33 @@ bool MeshField::isWithinThis(uint i) {
 
 }
 
-void MeshField::removeEvent(uint i)
+template<typename pT>
+void MeshField<pT>::removeEvent(uint i)
 {
     events.erase(events.begin() + i);
 
-    for (uint j = i; j < events.size(); ++j) {
+    for (uint j = i; j < events.size(); ++j)
+    {
         events.at(j)->setAddress(j);
     }
 }
 
-
-void MeshField::resetSubFields()
+template<typename pT>
+void MeshField<pT>::resetSubFields()
 {
-    for (MeshField* subField : subFields){
+    for (MeshField<pT> *subField : subFields)
+    {
         subField->resetSubFields();
     }
 
     resetContents();
 }
 
-void MeshField::prepareEvents()
+template<typename pT>
+void MeshField<pT>::prepareEvents()
 {
 
-    for (Event* event : events)
+    for (Event<pT> *event : events)
     {
         event->setPriority();
 
@@ -68,7 +69,7 @@ void MeshField::prepareEvents()
 
     }
 
-    for (MeshField* subfield : subFields)
+    for (MeshField<pT>* subfield : subFields)
     {
         subfield->prepareEvents();
     }
@@ -76,7 +77,8 @@ void MeshField::prepareEvents()
 }
 
 
-bool MeshField::append(uint i)
+template<typename pT>
+bool MeshField<pT>::append(uint i)
 {
 
     if (isWithinThis(i)){
@@ -88,20 +90,20 @@ bool MeshField::append(uint i)
 
 }
 
-
-void MeshField::sendToTop(Event &event)
+template<typename pT>
+void MeshField<pT>::sendToTop(Event<pT> &event)
 {
     parent->sendToTop(event);
 }
 
-
-bool MeshField::checkSubFields(uint i)
+template<typename pT>
+bool MeshField<pT>::checkSubFields(uint i)
 {
 
     bool matchInSubField;
     bool matchedInSubLevel = false;
 
-    for (MeshField* subField : subFields)
+    for (MeshField<pT>* subField : subFields)
     {
 
         matchInSubField = subField->checkSubFields(i);
@@ -124,7 +126,8 @@ bool MeshField::checkSubFields(uint i)
 
 
 
-bool MeshField::notCompatible(MeshField & subField)
+template<typename pT>
+bool MeshField<pT>::notCompatible(MeshField<pT> &subField)
 {
 
     if (&subField == this) return true;
@@ -168,23 +171,24 @@ bool MeshField::notCompatible(MeshField & subField)
 
 }
 
-void MeshField::setTopology(const mat &topology, bool recursive)
+template<typename pT>
+void MeshField<pT>::setTopology(const Mat<pT> &topology, bool recursive)
 {
 
     if (recursive) {
-        for (MeshField * subField : subFields) {
+        for (MeshField<pT> * subField : subFields) {
             subField->scaleField(shape, this->topology, topology);
         }
     }
 
     //Evil haxx for changing const values
 
-    mat * matPtr;
-    matPtr = (mat*)(&this->topology);
+    Mat<pT> * matPtr;
+    matPtr = (Mat<pT>*)(&this->topology);
     *matPtr = topology;
 
-    vec * vecPtr;
-    vecPtr = (vec*)(&shape);
+    Col<pT> * vecPtr;
+    vecPtr = (Col<pT>*)(&shape);
     *vecPtr = topology.col(1) - topology.col(0);
 
     //Calculate the volume
@@ -199,14 +203,13 @@ void MeshField::setTopology(const mat &topology, bool recursive)
 }
 
 
-void MeshField::addEvent(Event & event)
+template<typename pT>
+void MeshField<pT>::addEvent(Event<pT> &event)
 {
 
     event.setMeshField(this);
 
     event.setOutputVariables();
-
-    event.setParticles(particles);
 
     events.push_back(&event);
 
@@ -214,7 +217,9 @@ void MeshField::addEvent(Event & event)
 
 }
 
-void MeshField::addSubField(MeshField  & subField)
+
+template<typename pT>
+void MeshField<pT>::addSubField(MeshField<pT>  & subField)
 {
 
     if (notCompatible(subField)) {
@@ -224,7 +229,7 @@ void MeshField::addSubField(MeshField  & subField)
         s << "subfield " << subField.description << " not compatible on " << description << std::endl;
         s << "CONFLICT:\nsubField\n" << subField.topology << " is out of bounds, similar to parent or inverted/empty\n" << topology << std::endl;
 
-        mat issue = (-topology + subField.topology);
+        Mat<pT> issue = (-topology + subField.topology);
         issue.col(1)*=-1;
 
         s << "Issue at negative or non-zero region:\n" << issue << std::endl;
@@ -239,10 +244,11 @@ void MeshField::addSubField(MeshField  & subField)
 
 }
 
-void MeshField::stretchField(double deltaL, uint xyz)
+template<typename pT>
+void MeshField<pT>::stretchField(double deltaL, uint xyz)
 {
 
-    mat newTopology = topology;
+    Mat<pT> newTopology = topology;
     newTopology(xyz, 0) += deltaL/2;
     newTopology(xyz, 1) -= deltaL/2;
 
@@ -250,9 +256,10 @@ void MeshField::stretchField(double deltaL, uint xyz)
 
 }
 
-void MeshField::scaleField(const vec & oldShape, const mat & oldTopology, const mat & newTopology){
+template<typename pT>
+void MeshField<pT>::scaleField(const Col<pT> & oldShape, const Mat<pT> & oldTopology, const Mat<pT> & newTopology){
 
-    mat newSubTopology(IGNIS_DIM, 2);
+    Mat<pT> newSubTopology(IGNIS_DIM, 2);
 
     double oldCOM, newCOM, shapeFac, newShape_i, newSubShape_i;
 
