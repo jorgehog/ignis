@@ -18,23 +18,19 @@ public:
 
     virtual uint count() const = 0;
 
-    virtual pT &at(const uint n, const uint d) const = 0;
+    virtual pT operator() (const uint n, const uint d) const = 0;
 
+    virtual pT &operator() (const uint n, const uint d) = 0;
 
-
-    pT &operator()(const uint n, const uint d) const
-    {
-        return at(n, d);
-    }
 
     colType &operator()(const uint n) const
     {
         colType* _col = new colType;
 
-        _col->memptr()[0] = this->at(n, 0);
-        _col->memptr()[1] = this->at(n, 1);
+        _col->memptr()[0] = (*this)(n, 0);
+        _col->memptr()[1] = (*this)(n, 1);
 #if INGIS_DIM == 3
-        _col->memptr()[2] = this->at(n, 2);
+        _col->memptr()[2] = (*this)(n, 2);
 #endif
 
         return *_col;
@@ -50,7 +46,7 @@ public:
         {
             for (uint j = 0; j < IGNIS_DIM; ++j)
             {
-                m(i, j) = at(i, j);
+                m(i, j) = (*this)(i, j);
             }
         }
 
