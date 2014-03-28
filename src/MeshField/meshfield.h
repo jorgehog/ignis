@@ -18,7 +18,7 @@ namespace ignis
 template<typename pT>
 class PositionHandler;
 
-template<typename pT = double, class pT2 = PositionHandler<pT> >
+template<typename pT = double>
 class Event;
 
 template<typename pT>
@@ -90,11 +90,6 @@ public:
         return atoms;
     }
 
-    const PositionHandler<double> & getParticles () const
-    {
-        return particles;
-    }
-
 
     const std::vector<MeshField*> & getSubfields() const
     {
@@ -115,7 +110,7 @@ protected:
 
     MeshField<pT> *parent;
 
-    const PositionHandler<pT> &particles;
+    PositionHandler<pT> &particles;
 
     std::vector<uint> atoms;
 

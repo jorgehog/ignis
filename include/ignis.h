@@ -7,7 +7,6 @@
 
 #include "../src/Event/event.h"
 #include "../src/Event/predefinedevents.h"
-#include "../src/gears.h"
 
 #include "../src/positionhandler.h"
 

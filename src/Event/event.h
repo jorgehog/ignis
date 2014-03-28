@@ -17,7 +17,7 @@ namespace ignis
 template<typename pT>
 class PositionHandler;
 
-template<typename pT, class pT2>
+template<typename pT>
 class Event
 {
 public:
@@ -260,9 +260,9 @@ protected:
 
     uint offsetTime = IGNIS_UNSET_UINT;
 
-    pT2 & particles()
+    PositionHandler<pT> & particles()
     {
-        return static_cast<pT2>(m_particles);
+        return m_particles;
     }
 
 private:

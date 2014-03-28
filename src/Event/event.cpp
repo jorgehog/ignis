@@ -11,8 +11,8 @@
 
 using namespace ignis;
 
-template<typename pT, class pT2>
-Event<pT, pT2>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
+template<typename pT>
+Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
     type(type),
     priority(IGNIS_UNSET_UINT),
     value(new double(0)),
@@ -28,8 +28,8 @@ Event<pT, pT2>::Event(std::string type, std::string unit, bool doOutput, bool to
 }
 
 
-template<typename pT, class pT2>
-void Event<pT, pT2>::storeEvent()
+template<typename pT>
+void Event<pT>::storeEvent()
 {
     if (!toFile) {
         return;
@@ -39,8 +39,8 @@ void Event<pT, pT2>::storeEvent()
 
 }
 
-template<typename pT, class pT2>
-void Event<pT, pT2>::setOutputVariables()
+template<typename pT>
+void Event<pT>::setOutputVariables()
 {
     if (toFile) {
         id = toFileCounter++;
@@ -48,8 +48,8 @@ void Event<pT, pT2>::setOutputVariables()
     }
 }
 
-template<typename pT, class pT2>
-void Event<pT, pT2>::setPriority()
+template<typename pT>
+void Event<pT>::setPriority()
 {
 
     if (priority == IGNIS_UNSET_UINT)
@@ -61,8 +61,8 @@ void Event<pT, pT2>::setPriority()
 
 }
 
-template<typename pT, class pT2>
-void Event<pT, pT2>::setManualPriority(uint p)
+template<typename pT>
+void Event<pT>::setManualPriority(uint p)
 {
     if (p == IGNIS_UNSET_UINT)
     {
@@ -77,8 +77,8 @@ void Event<pT, pT2>::setManualPriority(uint p)
 }
 
 
-template<typename pT, class pT2>
-std::string Event<pT, pT2>::dumpString()
+template<typename pT>
+std::string Event<pT>::dumpString()
 {
     using namespace std;
 
@@ -105,23 +105,23 @@ std::string Event<pT, pT2>::dumpString()
    Static member variables:
 */
 
-template<typename pT, class pT2>
-const uint * Event<pT, pT2>::loopCycle;
+template<typename pT>
+const uint * Event<pT>::loopCycle;
 
-template<typename pT, class pT2>
-std::vector<std::string> Event<pT, pT2>::outputTypes;
+template<typename pT>
+std::vector<std::string> Event<pT>::outputTypes;
 
-template<typename pT, class pT2>
-mat Event<pT, pT2>::observables;
+template<typename pT>
+mat Event<pT>::observables;
 
-template<typename pT, class pT2>
-uint Event<pT, pT2>::nCycles = 0;
+template<typename pT>
+uint Event<pT>::nCycles = 0;
 
-template<typename pT, class pT2>
-uint Event<pT, pT2>::totalCounter = 0;
+template<typename pT>
+uint Event<pT>::totalCounter = 0;
 
-template<typename pT, class pT2>
-uint Event<pT, pT2>::toFileCounter = 0;
+template<typename pT>
+uint Event<pT>::toFileCounter = 0;
 
-template<typename pT, class pT2>
-uint Event<pT, pT2>::priorityCounter = 0;
+template<typename pT>
+uint Event<pT>::priorityCounter = 0;

@@ -22,12 +22,12 @@ public:
         return true;
     }
 
-    static void setCurrentParticles(const PositionHandler<pT> &particles)
+    static void setCurrentParticles(PositionHandler<pT> &particles)
     {
         m_currentParticles = &particles;
     }
 
-    static const PositionHandler<pT> & getCurrentParticles()
+    static PositionHandler<pT> & getCurrentParticles()
     {
         return *m_currentParticles;
     }
@@ -74,7 +74,7 @@ private:
     void updateContainments();
 
 
-    static const PositionHandler<pT> *m_currentParticles;
+    static PositionHandler<pT> *m_currentParticles;
 
 
     std::string outputPath;
@@ -107,40 +107,6 @@ private:
     std::vector<LoopChunk *> allLoopChunks;
 
     LoopChunk * currentChunk;
-
-
-
-
-    class _dumpEvents : public Event<pT>
-    {
-    public:
-
-        _dumpEvents() : Event<pT>("INTRINSIC_EVENT_DUMP") {}
-
-        void execute()
-        {
-            dumpEvents();
-        }
-
-    } _stdout;
-
-    class _dumpEventsToFile : public Event<pT>
-    {
-    public:
-
-        _dumpEventsToFile() : Event<pT>("INTRINSIC_EVENT_FILEDUMP") {}
-
-        void initialize()
-        {
-            Event<pT>::initializeEventMatrix();
-        }
-
-        void execute()
-        {
-            dumpEventsToFile();
-        }
-
-    } _fileio;
 
 
 

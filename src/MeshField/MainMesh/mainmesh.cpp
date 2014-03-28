@@ -7,6 +7,7 @@
 
 #include "../../Event/event.h"
 
+#include "../../Event/intrinsicevents.h"
 
 
 #include <iomanip>
@@ -150,13 +151,15 @@ void MainMesh<pT>::addIntrinsicEvents()
 
     if (!m_silent)
     {
-        _stdout->setManualPriority();
+        _dumpEvents<pT> _stdout(this);
+        _stdout.setManualPriority();
         addEvent(_stdout);
     }
 
     if (!m_doFileIO)
     {
-        _fileio->setManualPriority();
+        _dumpEventsToFile<pT> _fileio(this);
+        _fileio.setManualPriority();
         addEvent(_fileio);
     }
 
@@ -315,4 +318,4 @@ void MainMesh<pT>::dumpEvents() const
 
 
 template<typename pT>
-const PositionHandler<pT> *MainMesh<pT>::m_currentParticles;
+PositionHandler<pT> *MainMesh<pT>::m_currentParticles;
