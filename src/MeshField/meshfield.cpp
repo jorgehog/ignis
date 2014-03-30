@@ -1,18 +1,12 @@
 #include "meshfield.h"
 
-#include "MainMesh/mainmesh.h"
-
-#include <sstream>
-#include "../positionhandler.h"
-#include "../Event/event.h"
-
 using namespace ignis;
 
 template<typename pT>
 MeshField<pT>::MeshField(const Mat<pT> &topology, const std::string description):
-    particles(MainMesh<pT>::getCurrentParticles()),
     volume(0),
-    description(description)
+    description(description),
+    particles(MainMesh<pT>::getCurrentParticles())
 {
     setTopology(topology, false);
 }
@@ -22,9 +16,9 @@ template<typename pT>
 bool MeshField<pT>::isWithinThis(uint i) {
 
     for (uint j = 0; j < IGNIS_DIM; ++j) {
-        if (particles(j, i) < topology(j, 0)){
+        if (particles(i, j) < topology(j, 0)){
             return false;
-        } else if (particles(j, i) > topology(j, 1)) {
+        } else if (particles(i, j) > topology(j, 1)) {
             return false;
         }
     }

@@ -23,14 +23,14 @@ public:
     virtual pT &operator() (const uint n, const uint d) = 0;
 
 
-    colType &operator()(const uint n) const
+    colType & vec(const uint n) const
     {
         colType* _col = new colType;
 
-        _col->memptr()[0] = (*this)(n, 0);
-        _col->memptr()[1] = (*this)(n, 1);
+        (*_col)(0) = (*this)(n, 0);
+        (*_col)(1) = (*this)(n, 1);
 #if INGIS_DIM == 3
-        _col->memptr()[2] = (*this)(n, 2);
+        (*_col)(2) = (*this)(n, 2);
 #endif
 
         return *_col;

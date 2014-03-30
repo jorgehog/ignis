@@ -1,8 +1,8 @@
 #pragma once
 
-#include "event.h"
+#include "../../Event/event.h"
 
-#include "MeshField/MainMesh/mainmesh.h"
+#include "mainmesh.h"
 
 namespace ignis
 {

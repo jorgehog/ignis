@@ -1,14 +1,5 @@
 #include "event.h"
 
-#include "../defines.h"
-
-#include "../positionhandler.h"
-
-#include "../MeshField/MainMesh/mainmesh.h"
-
-#include <sstream>
-#include <iomanip>
-
 using namespace ignis;
 
 template<typename pT>
@@ -20,9 +11,9 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     doOutput(doOutput),
     toFile(toFile),
     unit(unit),
-    m_particles(MainMesh<pT>::getCurrentParticles()),
     nTimesExecuted(0),
-    m_initialized(false)
+    m_initialized(false),
+    m_particles(MainMesh<pT>::getCurrentParticles())
 {
     totalCounter++;
 }

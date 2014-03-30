@@ -5,9 +5,7 @@
 namespace ignis
 {
 
-template<typename pT = double> class MainMesh;
-
-template<typename pT>
+template<typename pT = double>
 class MainMesh : public MeshField<pT>
 {
 
@@ -109,6 +107,8 @@ private:
     LoopChunk * currentChunk;
 
 
-
 };
+
 }
+
+#include "mainmesh.cpp"

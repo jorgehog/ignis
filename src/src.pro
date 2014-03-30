@@ -11,22 +11,21 @@ LIBS += -larmadillo -lconfig++
 
 DEFINES += ARMA_MAT_PREALLOC=3
 
-
-
-SOURCES += MeshField/meshfield.cpp \
-    Event/event.cpp \
-    MeshField/MainMesh/mainmesh.cpp
-
 HEADERS += \
     defines.h \
     Particles/particles.h \
     MeshField/meshfield.h \
     Event/event.h \
     MeshField/MainMesh/mainmesh.h \
+    MeshField/MainMesh/intrinsicevents.h \
     Event/predefinedevents.h \
-    Event/intrinsicevents.h \
     positionhandler.h
 
+
+OTHER_FILES += \
+    MeshField/meshfield.cpp \
+    Event/event.cpp \
+    MeshField/MainMesh/mainmesh.cpp
 
 
 QMAKE_CXX = gcc

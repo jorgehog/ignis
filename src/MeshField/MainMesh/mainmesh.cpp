@@ -1,16 +1,9 @@
-
 #include "mainmesh.h"
 
-#include <assert.h>
-
-#include "../../positionhandler.h"
-
-#include "../../Event/event.h"
-
-#include "../../Event/intrinsicevents.h"
-
+#include "intrinsicevents.h"
 
 #include <iomanip>
+
 
 using namespace ignis;
 
@@ -153,14 +146,14 @@ void MainMesh<pT>::addIntrinsicEvents()
     {
         _dumpEvents<pT> _stdout(this);
         _stdout.setManualPriority();
-        addEvent(_stdout);
+        this->addEvent(_stdout);
     }
 
-    if (!m_doFileIO)
+    if (m_doFileIO)
     {
         _dumpEventsToFile<pT> _fileio(this);
         _fileio.setManualPriority();
-        addEvent(_fileio);
+        this->addEvent(_fileio);
     }
 
 }
@@ -197,15 +190,17 @@ void MainMesh<pT>::setupChunks()
     assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
-    for (Event<pT>* event : allEvents) {
+    for (Event<pT>* event : allEvents) {      
         onsetTimes(k) = event->getOnsetTime();
         offsetTimes(k) = event->getOffsetTime();
+        cout << k <<  " " << onsetTimes(k) << " " << offsetTimes(k) << endl;
         k++;
     }
 
-
     onsetTimes = unique(onsetTimes);
     offsetTimes = unique(offsetTimes);
+
+
 
     uint start = onsetTimes(0);
     uint end;

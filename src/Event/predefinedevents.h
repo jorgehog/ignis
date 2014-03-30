@@ -84,7 +84,7 @@ public:
 
         for (uint i = 0; i < Event<pT>::particles().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                Event<pT>::particles()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
+                Event<pT>::particles()(i, j) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
             }
         }
     }
@@ -174,7 +174,7 @@ protected:
 
         pT scale = (pT)pow(vNew/(double)vPrev, 1.0/IGNIS_DIM);
         for (const uint & i : Event<pT>::meshField->getAtoms()) {
-            Event<pT>::particles()(i) *= scale;
+            Event<pT>::particles().vec(i) *= scale;
         }
     }
 

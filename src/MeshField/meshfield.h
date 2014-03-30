@@ -5,7 +5,7 @@
 
 #include <string>
 #include <vector>
-#include <exception>
+
 
 #include <armadillo>
 
@@ -119,7 +119,7 @@ protected:
     std::vector<MeshField<pT>* > subFields;
 
 
-    void sendToTop(Event<pT> & event);
+    virtual void sendToTop(Event<pT> & event);
 
 
     //This should be executed from the MainMesh,
@@ -142,5 +142,17 @@ protected:
     }
 
 };
+
+
+typedef MeshField<double> dField;
+
+typedef MeshField<float>  fField;
+
+typedef MeshField<uint>   uField;
+
+typedef MeshField<int>    iField;
+
+
 }
 
+#include "meshfield.cpp"
