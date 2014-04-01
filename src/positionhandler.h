@@ -2,6 +2,14 @@
 
 #include <armadillo>
 
+#define REGISTER_POSITIONHANDLER(handler, type) \
+protected: \
+    handler & particles() \
+    { \
+        return *static_cast<handler*>(&Event<type>::particles()); \
+    } \
+private: \
+
 namespace ignis
 {
 

@@ -273,14 +273,19 @@ protected:
 
     uint offsetTime = IGNIS_UNSET_UINT;
 
-    PositionHandler<pT> & particles()
+    static PositionHandler<pT> & particles()
     {
         return m_particles;
     }
 
+    static void setCurrentParticles(PositionHandler<pT> &particles)
+    {
+        m_particles = &particles;
+    }
+
 private:
 
-    PositionHandler<pT> & m_particles;
+    static PositionHandler<pT> & m_particles;
 
 };
 

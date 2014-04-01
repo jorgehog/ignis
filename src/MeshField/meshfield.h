@@ -110,7 +110,7 @@ protected:
 
     MeshField<pT> *parent;
 
-    PositionHandler<pT> &particles;
+    static PositionHandler<pT> &particles;
 
     std::vector<uint> atoms;
 

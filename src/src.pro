@@ -2,7 +2,6 @@ include(../../ignisdefines.pri)
 
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += DCViz
 
 TEMPLATE = lib 
 
@@ -53,6 +52,8 @@ QMAKE_CXXFLAGS_DEBUG += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS -O3 -DARMA_NO_DEBUG -DNDEBUG -g
 
 QMAKE_LFLAGS += -g
+
+QMAKE_CLEAN += ../lib/lib*
 
 
 DCViz {

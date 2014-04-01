@@ -276,3 +276,6 @@ void MeshField<pT>::scaleField(const Col<pT> & oldShape, const Mat<pT> & oldTopo
     setTopology(newSubTopology);
 
 }
+
+template<typename pT>
+PositionHandler<pT> &MeshField<pT>particles;
