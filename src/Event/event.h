@@ -22,6 +22,11 @@ class Event
 {
 public:
 
+    static const uint & nCycles()
+    {
+        return m_nCycles;
+    }
+
     Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
 
 
@@ -33,6 +38,11 @@ public:
     const bool & initialized() const
     {
         return m_initialized;
+    }
+
+    void markAsInitialized()
+    {
+        m_initialized = true;
     }
 
     virtual void initialize(){}
@@ -107,7 +117,7 @@ public:
     }
 
     static void setNumberOfCycles(uint & N){
-        Event<pT>::nCycles = N;
+        Event<pT>::m_nCycles = N;
     }
 
     static void setLoopCyclePtr(const uint* loopCycle){
@@ -126,8 +136,11 @@ public:
         }
 
         if (offsetTime == IGNIS_UNSET_UINT) {
-            setOffsetTime(nCycles-1);
+            setOffsetTime(m_nCycles-1);
         }
+
+        assert(offsetTime < m_nCycles);
+        assert(onsetTime < m_nCycles);
 
     }
 
@@ -139,9 +152,9 @@ public:
 
     static void initializeEventMatrix()
     {
-        assert(nCycles!=0 && "Unset or empty number of cycles");
+        assert(m_nCycles!=0 && "Unset or empty number of cycles");
 
-        observables.zeros(nCycles, getCounter());
+        observables.zeros(m_nCycles, getCounter());
     }
 
     static void dumpEventMatrixData(uint k)
@@ -208,7 +221,7 @@ public:
 
 protected:
 
-    static uint nCycles;
+    static uint m_nCycles;
 
     static const uint *loopCycle;
 

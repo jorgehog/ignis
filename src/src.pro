@@ -2,6 +2,7 @@ include(../../ignisdefines.pri)
 
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += DCViz
 
 TEMPLATE = lib 
 
@@ -56,7 +57,7 @@ QMAKE_LFLAGS += -g
 
 DCViz {
     LIBS += -lpython2.7
-    INCLUDEPATH += /home/jorgehog/code/DCViz/include
+    INCLUDEPATH += $(HOME)/code/DCViz/include /usr/include/python2.7
     DEFINES += USE_DCVIZ
 }
 

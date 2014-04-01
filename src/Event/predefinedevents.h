@@ -27,6 +27,9 @@ template<typename pT>
 class periodicScaling : public Event<pT> {
 public:
 
+    using Event<pT>::particles;
+    using Event<pT>::meshField;
+
     periodicScaling() : Event<pT>("PeriodicRescale") {}
 
 
@@ -36,32 +39,29 @@ public:
     {
 
         using namespace std;
-#if defined (IGNIS_PERIODIC_X) || defined (IGNIS_PERIODIC_Y) || defined (IGNIS_PERIODIC_Z)
-        for (uint i = 0; i < N(); ++i) {
-#ifdef IGNIS_PERIODIC_X
-            if (positions(0, i) < meshField->topology(0, 0)) {
-                positions(0, i) += meshField->shape(0);
+
+        for (uint i = 0; i < particles().count(); ++i) {
+            if (particles()(i, 0) < meshField->topology(0, 0)) {
+                particles()(i, 0) += meshField->shape(0);
             }
-            positions(0, i) = meshField->topology(0, 0) +
-                    fmod(positions(0, i) - meshField->topology(0, 0), meshField->shape(0));
-#endif
-#ifdef IGNIS_PERIODIC_Y
-            if (positions(1, i) < meshField->topology(1, 0)) {
-                positions(1, i) += meshField->shape(1);
+            particles()(i, 0) = meshField->topology(0, 0) +
+                    fmod(particles()(i, 0) - meshField->topology(0, 0), meshField->shape(0));
+
+            if (particles()(i, 1) < meshField->topology(1, 0)) {
+                particles()(i, 1) += meshField->shape(1);
             }
-            positions(1, i) = meshField->topology(1, 0) +
-                    fmod(positions(1, i) - meshField->topology(1, 0), meshField->shape(1));
-#endif
-#ifdef IGNIS_PERIODIC_Z
-            if (positions(2, i) < meshField->topology(2, 0)) {
-                positions(2, i) += meshField->shape(2);
+            particles()(i, 1) = meshField->topology(1, 0) +
+                    fmod(particles()(i, 1) - meshField->topology(1, 0), meshField->shape(1));
+
+#if IGNIS_DIM == 3
+            if (particles()(i, 2) < meshField->topology(2, 0)) {
+                particles()(i, 2) += meshField->shape(2);
             }
-            positions(2, i) = meshField->topology(2, 0) +
-                    fmod(positions(2, i), meshField->shape(2));
+            particles()(i, 2) = meshField->topology(2, 0) +
+                    fmod(particles()(i, 2), meshField->shape(2));
 
 #endif
         }
-#endif
     }
 
 };
@@ -84,7 +84,7 @@ public:
 
         for (uint i = 0; i < Event<pT>::particles().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                Event<pT>::particles()(i, j) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
+                Event<pT>::particles()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
             }
         }
     }
@@ -120,7 +120,7 @@ public:
     ReportProgress() : Event<>("Progress", "%", true) {}
 
     void execute() {
-        setValue(*loopCycle*100.0/nCycles);
+        setValue(*loopCycle*100.0/m_nCycles);
     }
 };
 
@@ -191,8 +191,8 @@ public:
         if ((*Event<pT>::loopCycle % freq) == 0) {
 
             scaledPos = Event<pT>::particles();
-            scaledPos.row(0)/=Event<pT>::meshField->shape(0);
-            scaledPos.row(1)/=Event<pT>::meshField->shape(1);
+            scaledPos.col(0)/=Event<pT>::meshField->shape(0);
+            scaledPos.col(1)/=Event<pT>::meshField->shape(1);
 
             std::stringstream s;
             s << path << "/ignisPos" << *Event<pT>::loopCycle << ".arma";
@@ -210,13 +210,15 @@ private:
 };
 
 #ifdef USE_DCVIZ
-class LauchDCViz : public Event {
+class LauchDCViz : public Event<>
+{
 
 public:
 
-    LauchDCViz(std::string path, double delay) : Event(), delay(delay), viz(path + "/ignisPos0.arma") {}
+    LauchDCViz(std::string path, double delay) : Event("DCViz"), delay(delay), viz(path + "/ignisPos0.arma") {}
 
-    void initialize() {
+    void initialize()
+    {
         viz.launch(true, delay, 16, 14);
     }
 

@@ -96,6 +96,7 @@ void MainMesh<pT>::eventLoop(uint N)
     uint* loopCycle = new uint(0);
 
     Event<pT>::setNumberOfCycles(N);
+
     Event<pT>::setLoopCyclePtr(loopCycle);
 
     this->prepareEvents();
@@ -144,16 +145,16 @@ void MainMesh<pT>::addIntrinsicEvents()
 
     if (!m_silent)
     {
-        _dumpEvents<pT> _stdout(this);
-        _stdout.setManualPriority();
-        this->addEvent(_stdout);
+        _dumpEvents<pT> *_stdout = new _dumpEvents<pT>(this);
+        _stdout->setManualPriority();
+        this->addEvent(*_stdout);
     }
 
     if (m_doFileIO)
     {
-        _dumpEventsToFile<pT> _fileio(this);
-        _fileio.setManualPriority();
-        this->addEvent(_fileio);
+        _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
+        _fileio->setManualPriority();
+        this->addEvent(*_fileio);
     }
 
 }
@@ -175,6 +176,7 @@ void MainMesh<pT>::initializeNewEvents()
         if (!event->initialized())
         {
             event->initialize();
+            event->markAsInitialized();
         }
     }
 }
@@ -193,7 +195,6 @@ void MainMesh<pT>::setupChunks()
     for (Event<pT>* event : allEvents) {      
         onsetTimes(k) = event->getOnsetTime();
         offsetTimes(k) = event->getOffsetTime();
-        cout << k <<  " " << onsetTimes(k) << " " << offsetTimes(k) << endl;
         k++;
     }
 

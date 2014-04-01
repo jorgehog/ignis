@@ -106,7 +106,7 @@ template<typename pT>
 mat Event<pT>::observables;
 
 template<typename pT>
-uint Event<pT>::nCycles = 0;
+uint Event<pT>::m_nCycles = 0;
 
 template<typename pT>
 uint Event<pT>::totalCounter = 0;
