@@ -113,11 +113,11 @@ public:
 
 };
 
-class ReportProgress : public Event<>
+class ReportProgress : public Event<uint>
 {
 public:
 
-    ReportProgress() : Event<>("Progress", "%", true) {}
+    ReportProgress() : Event<uint>("Progress", "%", true) {}
 
     void execute() {
         setValue(*loopCycle*100.0/m_nCycles);

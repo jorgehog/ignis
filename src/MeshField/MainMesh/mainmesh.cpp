@@ -9,25 +9,40 @@ using namespace ignis;
 
 
 template<typename pT>
-MainMesh<pT>::MainMesh(const Mat<pT> &topology):
+MainMesh<pT>::MainMesh(const Mat<pT> &topology) :
     MeshField<pT>(topology, "MainMesh"),
     m_silent(false),
     m_doFileIO(true)
 {
+    onConstruct();
+}
 
+template<typename pT>
+MainMesh<pT>::MainMesh(const std::initializer_list<pT> topology) :
+    MeshField<pT>(topology, "MainMesh"),
+    m_silent(false),
+    m_doFileIO(true)
+{
+    onConstruct();
+}
+
+template<typename pT>
+void MainMesh<pT>::onConstruct()
+{
     setOutputPath("/tmp/");
 
-    for (uint i = 0; i < MeshField<pT>::particles.count(); ++i)
+    assert(m_currentParticles != NULL);
+
+    for (uint i = 0; i < m_currentParticles->count(); ++i)
     {
         this->atoms.push_back(i);
     }
-
 }
 
 template<typename pT>
 uint MainMesh<pT>::getPopulation() const
 {
-    return this->particles.count();
+    return MeshField<pT>::totalNumberOfParticles();
 }
 
 template<typename pT>
@@ -39,7 +54,7 @@ void MainMesh<pT>::updateContainments()
         subField->resetSubFields();
     }
 
-    for (uint i = 0; i < MeshField<pT>::particles.count(); ++i)
+    for (uint i = 0; i < MeshField<pT>::m_particles.count(); ++i)
     {
 
         for (MeshField<pT> *subField : MeshField<pT>::subFields)
@@ -314,4 +329,4 @@ void MainMesh<pT>::dumpEvents() const
 
 
 template<typename pT>
-PositionHandler<pT> *MainMesh<pT>::m_currentParticles;
+PositionHandler<pT> *MainMesh<pT>::m_currentParticles = NULL;

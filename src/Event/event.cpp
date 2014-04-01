@@ -12,7 +12,8 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     toFile(toFile),
     unit(unit),
     nTimesExecuted(0),
-    m_initialized(false)
+    m_initialized(false),
+    m_particles(MainMesh<pT>::currentParticles())
 {
     totalCounter++;
 }
@@ -115,6 +116,3 @@ uint Event<pT>::toFileCounter = 0;
 
 template<typename pT>
 uint Event<pT>::priorityCounter = 0;
-
-template<typename pT>
-PositionHandler<pT> Event<pT>::m_particles;

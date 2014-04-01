@@ -273,19 +273,25 @@ protected:
 
     uint offsetTime = IGNIS_UNSET_UINT;
 
-    static PositionHandler<pT> & particles()
+
+    const pT &particles(const uint n, const uint d)
     {
-        return m_particles;
+        return (*m_particles)(n, d);
     }
 
-    static void setCurrentParticles(PositionHandler<pT> &particles)
+    PositionHandler<pT> & particles()
     {
-        m_particles = &particles;
+        return *m_particles;
+    }
+
+    uint totalNumberOfParticles()
+    {
+        return m_particles->count();
     }
 
 private:
 
-    static PositionHandler<pT> & m_particles;
+    PositionHandler<pT> *m_particles;
 
 };
 

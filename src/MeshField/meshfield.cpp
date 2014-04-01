@@ -1,14 +1,24 @@
 #include "meshfield.h"
 
+#include "MainMesh/mainmesh.h"
+
 using namespace ignis;
 
 template<typename pT>
-MeshField<pT>::MeshField(const Mat<pT> &topology, const std::string description):
+MeshField<pT>::MeshField(const topmat &topology, const std::string description) :
     volume(0),
     description(description),
-    particles(MainMesh<pT>::getCurrentParticles())
+    m_particles(MainMesh<pT>::currentParticles())
 {
     setTopology(topology, false);
+}
+
+template<typename pT>
+MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::string description) :
+    volume(0),
+    description(description)
+{
+    setTopology(topology);
 }
 
 
@@ -166,7 +176,7 @@ bool MeshField<pT>::notCompatible(MeshField<pT> &subField)
 }
 
 template<typename pT>
-void MeshField<pT>::setTopology(const Mat<pT> &topology, bool recursive)
+void MeshField<pT>::setTopology(const topmat &topology, bool recursive)
 {
 
     if (recursive) {
@@ -177,22 +187,31 @@ void MeshField<pT>::setTopology(const Mat<pT> &topology, bool recursive)
 
     //Evil haxx for changing const values
 
-    Mat<pT> * matPtr;
-    matPtr = (Mat<pT>*)(&this->topology);
+    topmat * matPtr;
+    matPtr = (topmat*)(&this->topology);
     *matPtr = topology;
 
-    Col<pT> * vecPtr;
-    vecPtr = (Col<pT>*)(&shape);
+    shapevec * vecPtr;
+    vecPtr = (shapevec*)(&shape);
     *vecPtr = topology.col(1) - topology.col(0);
 
     //Calculate the volume
-    double *new_volume;
-    new_volume = (double*)(&volume);
+    pT *new_volume;
+    new_volume = (pT*)(&volume);
 
     *new_volume = 1;
     for (uint i = 0; i < IGNIS_DIM; ++i) {
         *new_volume *= shape(i);
     }
+
+}
+
+template<typename pT>
+void MeshField<pT>::setTopology(const std::initializer_list<pT> topology, bool recursive)
+{
+    const topmat *newTop = new topmat(topology);
+
+    setTopology(*newTop);
 
 }
 
@@ -276,6 +295,3 @@ void MeshField<pT>::scaleField(const Col<pT> & oldShape, const Mat<pT> & oldTopo
     setTopology(newSubTopology);
 
 }
-
-template<typename pT>
-PositionHandler<pT> &MeshField<pT>particles;

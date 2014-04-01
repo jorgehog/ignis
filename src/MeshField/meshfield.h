@@ -27,19 +27,25 @@ class MainMesh;
 template<typename pT>
 class MeshField
 {
-
 public:
 
-    MeshField(const Mat<pT> & topology, const std::string description = "meshField");
+    typedef typename Mat<pT>::template fixed<IGNIS_DIM, 2> topmat;
+    typedef typename Col<pT>::template fixed<IGNIS_DIM>    shapevec;
+
+    MeshField(const topmat & topology, const std::string description = "meshField");
+
+    MeshField(const std::initializer_list<pT> topology, const std::string description);
 
 
     const pT volume;
 
-    const typename Mat<pT>::template fixed<IGNIS_DIM, 2> topology;
+    const topmat topology;
 
-    const typename Col<pT>::template fixed<IGNIS_DIM> shape;
+    const shapevec shape;
 
-    void setTopology(const Mat<pT> &topology, bool recursive=true);
+    void setTopology(const topmat &topology, bool recursive=true);
+
+    void setTopology(const std::initializer_list<pT> topology, bool recursive=true);
 
 
     const std::string description;
@@ -102,15 +108,24 @@ public:
     }
 
 
-    friend class MainMesh<pT>;
-    friend class ContractMesh;
-    friend class ExpandMesh;
+    uint totalNumberOfParticles() const
+    {
+        return m_particles->count();
+    }
+
+
+private:
+    PositionHandler<pT> *m_particles;
 
 protected:
 
     MeshField<pT> *parent;
 
-    static PositionHandler<pT> &particles;
+
+    const pT &particles(const uint n, const uint d)
+    {
+        return (*m_particles)(n, d);
+    }
 
     std::vector<uint> atoms;
 
@@ -144,13 +159,13 @@ protected:
 };
 
 
-typedef MeshField<double> dField;
+typedef MeshField<double> field;
 
-typedef MeshField<float>  fField;
+typedef MeshField<float>  ffield;
 
-typedef MeshField<uint>   uField;
+typedef MeshField<uint>   lattice;
 
-typedef MeshField<int>    iField;
+typedef MeshField<int>    ilattice;
 
 
 }

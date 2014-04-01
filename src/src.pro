@@ -1,7 +1,6 @@
-include(../../ignisdefines.pri)
-
 CONFIG -= app_bundle
 CONFIG -= qt
+#CONFIG += 2D
 
 TEMPLATE = lib 
 
@@ -55,6 +54,11 @@ QMAKE_LFLAGS += -g
 
 QMAKE_CLEAN += ../lib/lib*
 
+2D  {
+
+    DEFINES += IGNIS_DIM=2
+
+}
 
 DCViz {
     LIBS += -lpython2.7

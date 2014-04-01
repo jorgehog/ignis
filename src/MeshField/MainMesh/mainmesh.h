@@ -13,6 +13,10 @@ public:
 
     MainMesh(const Mat<pT> &topology);
 
+    MainMesh(const std::initializer_list<pT> topology);
+
+    void onConstruct();
+
     uint getPopulation() const;
 
     bool isMainMesh() const
@@ -25,11 +29,10 @@ public:
         m_currentParticles = &particles;
     }
 
-    static PositionHandler<pT> & getCurrentParticles()
+    static PositionHandler<pT> * currentParticles()
     {
-        return *m_currentParticles;
+        return m_currentParticles;
     }
-
 
     void eventLoop(uint N);
 
@@ -108,6 +111,10 @@ private:
 
 
 };
+
+typedef MainMesh<uint>  MainLattice;
+typedef MainMesh<int>   iMainLattice;
+typedef MainMesh<float> fMainLattice;
 
 }
 
