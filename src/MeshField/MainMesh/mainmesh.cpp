@@ -32,10 +32,6 @@ MainMesh<pT>::MainMesh(const std::initializer_list<pT> topology) :
 template<typename pT>
 MainMesh<pT>::~MainMesh()
 {
-    m_currentParticles = NULL;
-    m_doFileIO = true;
-    m_doOutput = true;
-    m_reportProgress = true;
 
     for (LoopChunk *lc : allLoopChunks)
     {
@@ -317,7 +313,7 @@ void MainMesh<pT>::setupChunks()
         }
     }
 
-    dumpLoopChunkInfo();
+//    dumpLoopChunkInfo();
 
 }
 
@@ -351,6 +347,10 @@ void MainMesh<pT>::dumpEvents() const
     cout << endl;
 }
 
+
+
+template<typename pT>
+uint MainMesh<pT>::nCyclesPerOutput = 0;
 
 template<typename pT>
 bool MainMesh<pT>::m_doOutput = true;

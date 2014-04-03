@@ -30,7 +30,7 @@ public:
     Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
     virtual ~Event();
 
-    static resetAll();
+    static void resetEventParameters();
 
     void executeEvent() {
         execute();

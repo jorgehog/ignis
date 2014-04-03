@@ -11,6 +11,9 @@ class MainMesh : public MeshField<pT>
 
 public:
 
+    //tmp
+    static uint nCyclesPerOutput;
+
     MainMesh();
 
     MainMesh(const Mat<pT> &topology);

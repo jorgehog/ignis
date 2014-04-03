@@ -21,29 +21,26 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
 template<typename pT>
 Event<pT>::~Event()
 {
+    totalCounter--;
     delete value;
 }
 
 template<typename pT>
-Event::resetAll()
+void Event<pT>::resetEventParameters()
 {
-    template<typename pT>
-    std::vector<std::string> Event<pT>::outputTypes;
+    if (totalCounter != 0)
+    {
+        throw std::runtime_error("Cannot reset events: Some events are still active.");
+    }
 
-    template<typename pT>
-    mat Event<pT>::observables;
 
-    template<typename pT>
-    uint Event<pT>::m_nCycles = 0;
+    outputTypes.clear();
 
-    template<typename pT>
-    uint Event<pT>::totalCounter = 0;
+    observables.clear();
 
-    template<typename pT>
-    uint Event<pT>::toFileCounter = 0;
+    toFileCounter = 0;
+    priorityCounter = 0;
 
-    template<typename pT>
-    uint Event<pT>::priorityCounter = 0;
 }
 
 
@@ -124,8 +121,10 @@ std::string Event<pT>::dumpString()
    Static member variables:
 */
 
+
+
 template<typename pT>
-const uint * Event<pT>::loopCycle;
+const uint *Event<pT>::loopCycle;
 
 template<typename pT>
 std::vector<std::string> Event<pT>::outputTypes;

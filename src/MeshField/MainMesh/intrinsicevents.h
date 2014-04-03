@@ -31,7 +31,11 @@ public:
 
     void execute()
     {
-        mm->dumpEvents();
+        //tmp
+        if ((*this->loopCycle + 1)%(MainMesh<pT>::nCyclesPerOutput) == 0)
+        {
+            mm->dumpEvents();
+        }
     }
 
 private:
