@@ -101,27 +101,17 @@ public:
  */
 
 
-class countAtoms : public Event<>
+template<typename pT>
+class countAtoms : public Event<pT>
 {
 public:
 
-    countAtoms() : Event<>("Counting atoms", "", true) {}
+    countAtoms() : Event<pT>("Counting atoms", "", true) {}
 
     void execute(){
-        setValue((Event<>::meshField->getPopulation()/double(Event<>::particles().count()))/(Event<>::meshField->volume));
+        setValue((Event<pT>::meshField->getPopulation()/double(Event<pT>::particles().count()))/(Event<pT>::meshField->volume));
     }
 
-};
-
-class ReportProgress : public Event<uint>
-{
-public:
-
-    ReportProgress() : Event<uint>("Progress", "%", true) {}
-
-    void execute() {
-        setValue(*loopCycle*100.0/m_nCycles);
-    }
 };
 
 

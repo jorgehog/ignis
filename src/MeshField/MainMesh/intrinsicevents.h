@@ -8,6 +8,21 @@ namespace ignis
 {
 
 template<typename pT>
+class _reportProgress : public Event<pT>
+{
+public:
+
+    using Event<pT>::loopCycle;
+    using Event<pT>::m_nCycles;
+
+    _reportProgress() : Event<pT>("Progress", "%", true) {}
+
+    void execute() {
+        this->setValue(*loopCycle*100.0/m_nCycles);
+    }
+};
+
+template<typename pT>
 class _dumpEvents : public Event<pT>
 {
 public:

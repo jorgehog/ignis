@@ -9,19 +9,22 @@ using namespace ignis;
 
 
 template<typename pT>
+MainMesh<pT>::MainMesh() :
+    MeshField<pT>(string("MainMesh"))
+{
+    onConstruct();
+}
+
+template<typename pT>
 MainMesh<pT>::MainMesh(const Mat<pT> &topology) :
-    MeshField<pT>(topology, "MainMesh"),
-    m_silent(false),
-    m_doFileIO(true)
+    MeshField<pT>(topology, "MainMesh")
 {
     onConstruct();
 }
 
 template<typename pT>
 MainMesh<pT>::MainMesh(const std::initializer_list<pT> topology) :
-    MeshField<pT>(topology, "MainMesh"),
-    m_silent(false),
-    m_doFileIO(true)
+    MeshField<pT>(topology, "MainMesh")
 {
     onConstruct();
 }
@@ -49,15 +52,15 @@ template<typename pT>
 void MainMesh<pT>::updateContainments()
 {
 
-    for (MeshField<pT> *subField : MeshField<pT>::subFields)
+    for (MeshField<pT> *subField : this->subFields)
     {
         subField->resetSubFields();
     }
 
-    for (uint i = 0; i < MeshField<pT>::m_particles.count(); ++i)
+    for (uint i = 0; i < this->m_particles->count(); ++i)
     {
 
-        for (MeshField<pT> *subField : MeshField<pT>::subFields)
+        for (MeshField<pT> *subField : this->subFields)
         {
             (void)subField->checkSubFields(i);
         }
@@ -158,7 +161,14 @@ template<typename pT>
 void MainMesh<pT>::addIntrinsicEvents()
 {
 
-    if (!m_silent)
+    if (m_reportProgress)
+    {
+        _reportProgress<pT> *_prog = new _reportProgress<pT>();
+        _prog->setManualPriority();
+        this->addEvent(*_prog);
+    }
+
+    if (m_doOutput)
     {
         _dumpEvents<pT> *_stdout = new _dumpEvents<pT>(this);
         _stdout->setManualPriority();
@@ -327,6 +337,14 @@ void MainMesh<pT>::dumpEvents() const
 }
 
 
+template<typename pT>
+bool MainMesh<pT>::m_doOutput = true;
+
+template<typename pT>
+bool MainMesh<pT>::m_doFileIO = true;
+
+template<typename pT>
+bool MainMesh<pT>::m_reportProgress = true;
 
 template<typename pT>
 PositionHandler<pT> *MainMesh<pT>::m_currentParticles = NULL;

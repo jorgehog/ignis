@@ -5,6 +5,16 @@
 using namespace ignis;
 
 template<typename pT>
+MeshField<pT>::MeshField(const std::string description) :
+    volume(0),
+    description(description),
+    m_particles(MainMesh<pT>::currentParticles())
+{
+    topmat *_top = new topmat(fill::zeros);
+    setTopology(*_top);
+}
+
+template<typename pT>
 MeshField<pT>::MeshField(const topmat &topology, const std::string description) :
     volume(0),
     description(description),
@@ -16,7 +26,8 @@ MeshField<pT>::MeshField(const topmat &topology, const std::string description) 
 template<typename pT>
 MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::string description) :
     volume(0),
-    description(description)
+    description(description),
+    m_particles(MainMesh<pT>::currentParticles())
 {
     setTopology(topology);
 }
@@ -136,8 +147,8 @@ bool MeshField<pT>::notCompatible(MeshField<pT> &subField)
 
     if (&subField == this) return true;
 
-    const mat & sft = subField.topology;
-    const mat & tft = this->topology;
+    const topmat & sft = subField.topology;
+    const topmat & tft = this->topology;
 
 #if IGNIS_DIM == 2
     bool outsideMesh =  (sft(0, 0) < tft(0, 0)) ||
@@ -211,7 +222,7 @@ void MeshField<pT>::setTopology(const std::initializer_list<pT> topology, bool r
 {
     const topmat *newTop = new topmat(topology);
 
-    setTopology(*newTop);
+    setTopology(*newTop, recursive);
 
 }
 

@@ -5,17 +5,20 @@
 namespace ignis
 {
 
-template<typename pT = double>
+template<typename pT>
 class MainMesh : public MeshField<pT>
 {
 
 public:
+
+    MainMesh();
 
     MainMesh(const Mat<pT> &topology);
 
     MainMesh(const std::initializer_list<pT> topology);
 
     void onConstruct();
+
 
     uint getPopulation() const;
 
@@ -42,14 +45,17 @@ public:
 
     void dumpEventsToFile() const;
 
-
-
-    void setSilent(const bool state)
+    void enableProgressReport(const bool state)
     {
-        m_silent = state;
+        m_reportProgress = state;
     }
 
-    void setFileIOState(const bool state)
+    static void enableOutput(const bool state)
+    {
+        m_doOutput = state;
+    }
+
+    void enableEventFile(const bool state)
     {
         m_doFileIO = state;
     }
@@ -85,11 +91,11 @@ private:
 
     void dumpLoopChunkInfo();
 
-    bool m_silent;
+    static bool m_doOutput;
 
-    bool m_doFileIO;
+    static bool m_doFileIO;
 
-
+    static bool m_reportProgress;
 
     struct LoopChunk
     {

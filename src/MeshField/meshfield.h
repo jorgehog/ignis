@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "../defines.h"
 
 #include <string>
@@ -21,7 +20,7 @@ class PositionHandler;
 template<typename pT = double>
 class Event;
 
-template<typename pT>
+template<typename pT = double>
 class MainMesh;
 
 template<typename pT>
@@ -29,8 +28,11 @@ class MeshField
 {
 public:
 
+    typedef pT type;
     typedef typename Mat<pT>::template fixed<IGNIS_DIM, 2> topmat;
     typedef typename Col<pT>::template fixed<IGNIS_DIM>    shapevec;
+
+    MeshField(const std::string description);
 
     MeshField(const topmat & topology, const std::string description = "meshField");
 
@@ -113,11 +115,11 @@ public:
         return m_particles->count();
     }
 
-
-private:
-    PositionHandler<pT> *m_particles;
+    friend class MainMesh<pT>;
 
 protected:
+
+    PositionHandler<pT> *m_particles;
 
     MeshField<pT> *parent;
 
@@ -148,7 +150,6 @@ protected:
 
     bool notCompatible(MeshField<pT> & subField);
 
-
     void resetSubFields();
 
     void resetContents()
@@ -159,9 +160,9 @@ protected:
 };
 
 
-typedef MeshField<double> field;
+typedef MeshField<double> meshfield;
 
-typedef MeshField<float>  ffield;
+typedef MeshField<float>  fmeshfield;
 
 typedef MeshField<uint>   lattice;
 
