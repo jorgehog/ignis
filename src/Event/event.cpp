@@ -18,6 +18,34 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     totalCounter++;
 }
 
+template<typename pT>
+Event<pT>::~Event()
+{
+    delete value;
+}
+
+template<typename pT>
+Event::resetAll()
+{
+    template<typename pT>
+    std::vector<std::string> Event<pT>::outputTypes;
+
+    template<typename pT>
+    mat Event<pT>::observables;
+
+    template<typename pT>
+    uint Event<pT>::m_nCycles = 0;
+
+    template<typename pT>
+    uint Event<pT>::totalCounter = 0;
+
+    template<typename pT>
+    uint Event<pT>::toFileCounter = 0;
+
+    template<typename pT>
+    uint Event<pT>::priorityCounter = 0;
+}
+
 
 template<typename pT>
 void Event<pT>::storeEvent()

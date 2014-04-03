@@ -38,6 +38,7 @@ public:
 
     MeshField(const std::initializer_list<pT> topology, const std::string description);
 
+    virtual ~MeshField();
 
     const pT volume;
 

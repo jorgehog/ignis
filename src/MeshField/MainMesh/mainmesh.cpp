@@ -30,6 +30,21 @@ MainMesh<pT>::MainMesh(const std::initializer_list<pT> topology) :
 }
 
 template<typename pT>
+MainMesh<pT>::~MainMesh()
+{
+    m_currentParticles = NULL;
+    m_doFileIO = true;
+    m_doOutput = true;
+    m_reportProgress = true;
+
+    for (LoopChunk *lc : allLoopChunks)
+    {
+        delete lc;
+    }
+
+}
+
+template<typename pT>
 void MainMesh<pT>::onConstruct()
 {
     setOutputPath("/tmp/");

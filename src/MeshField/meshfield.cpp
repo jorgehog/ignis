@@ -32,6 +32,20 @@ MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::st
     setTopology(topology);
 }
 
+template<typename pT>
+MeshField<pT>::~MeshField()
+{
+    for (Event<pT> *event : events)
+    {
+        delete event;
+    }
+
+    for (MeshField<pT> *meshField : subFields)
+    {
+        delete meshField;
+    }
+}
+
 
 template<typename pT>
 bool MeshField<pT>::isWithinThis(uint i) {

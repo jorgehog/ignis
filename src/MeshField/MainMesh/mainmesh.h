@@ -17,6 +17,8 @@ public:
 
     MainMesh(const std::initializer_list<pT> topology);
 
+    virtual ~MainMesh();
+
     void onConstruct();
 
 
