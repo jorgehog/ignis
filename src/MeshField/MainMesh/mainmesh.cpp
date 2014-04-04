@@ -323,7 +323,7 @@ void MainMesh<pT>::executeEvents()
 {
 
     for (Event<pT> * event : currentChunk->executeEvents) {
-        event->executeEvent();
+        event->_executeEvent();
     }
 
     for (Event<pT> * event : currentChunk->executeEvents) {

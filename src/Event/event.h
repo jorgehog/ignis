@@ -32,7 +32,7 @@ public:
 
     static void resetEventParameters();
 
-    void executeEvent() {
+    void _executeEvent() {
         execute();
         nTimesExecuted++;
     }
@@ -103,7 +103,7 @@ public:
     }
 
 
-    virtual double getMeasurement() const {
+    double getMeasurement() const {
         return *value;
     }
 
