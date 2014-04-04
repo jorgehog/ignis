@@ -50,7 +50,7 @@ public:
 
     void dumpEventsToFile() const;
 
-    void enableProgressReport(const bool state)
+    static void enableProgressReport(const bool state)
     {
         m_reportProgress = state;
     }
@@ -60,7 +60,7 @@ public:
         m_doOutput = state;
     }
 
-    void enableEventFile(const bool state)
+    static void enableEventFile(const bool state)
     {
         m_doFileIO = state;
     }
