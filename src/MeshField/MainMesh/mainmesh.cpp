@@ -104,7 +104,7 @@ void MainMesh<pT>::dumpLoopChunkInfo()
 }
 
 template<typename pT>
-void MainMesh<pT>::dumpEventsToFile() const
+void MainMesh<pT>::storeEventValues() const
 {
 
     for (Event<pT>* event: currentChunk->executeEvents)
@@ -112,7 +112,6 @@ void MainMesh<pT>::dumpEventsToFile() const
         event->storeEvent();
     }
 
-    Event<pT>::saveEventMatrix(outputPath);
 }
 
 
@@ -159,7 +158,7 @@ void MainMesh<pT>::setOutputPath(std::string path)
         path = path + "/";
     }
 
-    outputPath = path + "mdEventsOut.arma";
+    m_outputPath = path + "ignisEventsOut.arma";
 }
 
 template<typename pT>

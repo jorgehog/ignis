@@ -48,7 +48,12 @@ public:
 
     void dumpEvents() const;
 
-    void dumpEventsToFile() const;
+    void storeEventValues() const;
+
+    string outputPath() const
+    {
+        return m_outputPath;
+    }
 
     static void enableProgressReport(const bool state)
     {
@@ -89,7 +94,7 @@ private:
     static PositionHandler<pT> *m_currentParticles;
 
 
-    std::string outputPath;
+    std::string m_outputPath;
 
     std::vector<Event<pT> *> allEvents;
 

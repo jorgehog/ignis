@@ -58,7 +58,13 @@ public:
 
     void execute()
     {
-        mm->dumpEventsToFile();
+        mm->storeEventValues();
+
+        //TMP
+        if ((*this->loopCycle)%1000 == 0)
+        {
+            Event<pT>::saveEventMatrix(mm->outputPath());
+        }
     }
 
 private:

@@ -113,6 +113,10 @@ public:
         *(this->value) = value;
     }
 
+    void setValue(){
+        valueInitialized = true;
+    }
+
     void setMeshField(MeshField<pT> *meshField)
     {
         this->meshField = meshField;
