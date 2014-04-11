@@ -28,7 +28,15 @@ public:
 
     virtual pT operator() (const uint n, const uint d) const = 0;
 
-    virtual pT &operator() (const uint n, const uint d) = 0;
+    virtual pT &operator() (const uint n, const uint d)
+    {
+        (void) n;
+        (void) d;
+
+        throw std::runtime_error("Current implementation does not support setting of position data. Please override set operator.");
+
+        return *(new pT());
+    }
 
 
     colType & vec(const uint n) const

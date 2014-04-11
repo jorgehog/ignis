@@ -10,7 +10,7 @@ using namespace ignis;
 
 template<typename pT>
 MainMesh<pT>::MainMesh() :
-    MeshField<pT>(string("MainMesh"))
+    MeshField<pT>(std::string("MainMesh"))
 {
     onConstruct();
 }
@@ -116,14 +116,14 @@ void MainMesh<pT>::storeEventValues() const
 
 
 template<typename pT>
-void MainMesh<pT>::eventLoop(uint N)
+void MainMesh<pT>::eventLoop()
 {
 
     addIntrinsicEvents();
 
     uint* loopCycle = new uint(0);
 
-    Event<pT>::setNumberOfCycles(N);
+    Event<pT>::setNumberOfCycles(nCycles);
 
     Event<pT>::setLoopCyclePtr(loopCycle);
 
@@ -148,6 +148,8 @@ void MainMesh<pT>::eventLoop(uint N)
         }
 
     }
+
+    Event<pT>::saveEventMatrix(outputPath());
 
 }
 
@@ -349,7 +351,10 @@ void MainMesh<pT>::dumpEvents() const
 
 
 template<typename pT>
-uint MainMesh<pT>::nCyclesPerOutput = 0;
+uint MainMesh<pT>::nCyclesPerOutput = 1;
+
+template<typename pT>
+uint MainMesh<pT>::nCycles = 0;
 
 template<typename pT>
 bool MainMesh<pT>::m_doOutput = true;

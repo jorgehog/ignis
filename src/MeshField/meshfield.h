@@ -74,9 +74,19 @@ public:
 
     void addEvent(Event<pT> & event);
 
+    void addEvent(Event<pT> * event)
+    {
+        addEvent(*event);
+    }
+
     void removeEvent(uint i);
 
     void addSubField(MeshField &subField);
+
+    void addSubField(MeshField *subField)
+    {
+        addSubField(*subField);
+    }
 
     void removeSubField(uint i)
     {

@@ -11,7 +11,7 @@ class MainMesh : public MeshField<pT>
 
 public:
 
-    //tmp
+    static uint nCycles;
     static uint nCyclesPerOutput;
 
     MainMesh();
@@ -37,12 +37,18 @@ public:
         m_currentParticles = &particles;
     }
 
+    static void setCurrentParticles(PositionHandler<pT> *particles)
+    {
+        m_currentParticles = particles;
+    }
+
+
     static PositionHandler<pT> * currentParticles()
     {
         return m_currentParticles;
     }
 
-    void eventLoop(uint N);
+    void eventLoop();
 
     void setOutputPath(std::string path);
 
@@ -50,7 +56,7 @@ public:
 
     void storeEventValues() const;
 
-    string outputPath() const
+    std::string outputPath() const
     {
         return m_outputPath;
     }

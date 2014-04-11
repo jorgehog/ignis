@@ -1,5 +1,6 @@
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += USE_DCVIZ
 #CONFIG += 2D
 
 TEMPLATE = lib 

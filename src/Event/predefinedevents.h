@@ -200,12 +200,13 @@ private:
 };
 
 #ifdef USE_DCVIZ
-class LauchDCViz : public Event<>
+template<typename pT>
+class LauchDCViz : public Event<pT>
 {
 
 public:
 
-    LauchDCViz(std::string path, double delay) : Event("DCViz"), delay(delay), viz(path + "/ignisPos0.arma") {}
+    LauchDCViz(std::string path, double delay) : Event<pT>("DCViz"), delay(delay), viz(path) {}
 
     void initialize()
     {
