@@ -32,7 +32,7 @@ public:
     void execute()
     {
         //tmp
-        if ((*this->loopCycle + 1)%(MainMesh<pT>::nCyclesPerOutput) == 0)
+        if (this->nTimesExecuted%MainMesh<pT>::nCyclesPerOutput == 0)
         {
             mm->dumpEvents();
         }
