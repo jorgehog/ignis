@@ -8,6 +8,12 @@ protected: \
     { \
         return *static_cast<handler*>(&Event<type>::particles()); \
     } \
+    \
+    type particles(const uint n, const uint d) \
+    {\
+        return particles()(n, d);\
+    }\
+\
 private: \
 
 namespace ignis
