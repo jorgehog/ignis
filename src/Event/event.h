@@ -145,6 +145,9 @@ public:
             setOffsetTime(m_nCycles-1);
         }
 
+        eventLength = offsetTime - onsetTime;
+
+        assert(offsetTime >= onsetTime);
         assert(offsetTime < m_nCycles);
         assert(onsetTime < m_nCycles);
 
@@ -191,14 +194,7 @@ public:
     {
 
         if (offTime == IGNIS_UNSET_UINT) return;
-
-        assert((onsetTime != IGNIS_UNSET_UINT) && ("onTime must be set before offTime."));
-        assert(offTime > onsetTime && "Event must initialize before the shutdown.");
-        assert(offTime != 0 && "Event offtime must be greater than 0 to execute at all.");
-
         offsetTime = offTime;
-
-        eventLength = offTime - onsetTime;
 
     }
 
