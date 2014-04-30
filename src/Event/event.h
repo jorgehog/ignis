@@ -28,11 +28,13 @@ public:
     }
 
     Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
+
     virtual ~Event();
 
     static void resetEventParameters();
 
-    void _executeEvent() {
+    void _executeEvent()
+    {
         execute();
         nTimesExecuted++;
     }
@@ -52,7 +54,8 @@ public:
     virtual void reset(){}
 
 
-    uint getId() const {
+    uint getId() const
+    {
         return id;
     }
 
@@ -61,49 +64,60 @@ public:
 
     void setManualPriority(uint p = IGNIS_UNSET_UINT);
 
-    uint getPriority () const {
+    uint getPriority () const
+    {
         return priority;
     }
 
-    static const uint & getPriorityCounter() {
+    static const uint & getPriorityCounter()
+    {
         return priorityCounter;
     }
 
-    static const uint & getTotalCounter() {
+    static const uint & getTotalCounter()
+    {
         return totalCounter;
     }
 
-    std::string getType() const {
+    std::string getType() const
+    {
         return type;
     }
 
-    bool shouldToFile() const {
+    bool shouldToFile() const
+    {
         return toFile;
     }
 
-    bool notSilent() const {
+    bool notSilent() const
+    {
         return doOutput;
     }
 
-    std::string getUnit() const {
+    std::string getUnit() const
+    {
         return unit;
     }
 
-    static uint getCounter() {
+    static uint getCounter()
+    {
         return toFileCounter;
     }
 
 
-    uint getOnsetTime() const {
+    uint getOnsetTime() const
+    {
         return onsetTime;
     }
 
-    uint getOffsetTime() const {
+    uint getOffsetTime() const
+    {
         return offsetTime;
     }
 
 
-    double getMeasurement() const {
+    double getMeasurement() const
+    {
         return *value;
     }
 
@@ -206,13 +220,13 @@ public:
 
     }
 
-    bool _hasExecuteImpl()
+    bool _hasExecuteImpl() const
     {
         //        return (&this->execute != &Event::execute);
         return true;
     }
 
-    bool _hasResetImpl()
+    bool _hasResetImpl() const
     {
         //        return (&this->reset != &Event::reset);
         return true;
@@ -276,17 +290,17 @@ protected:
     uint offsetTime = IGNIS_UNSET_UINT;
 
 
-    const pT &particles(const uint n, const uint d)
+    const pT &particles(const uint n, const uint d) const
     {
         return (*m_particles)(n, d);
     }
 
-    PositionHandler<pT> & particles()
+    PositionHandler<pT> & particles() const
     {
         return *m_particles;
     }
 
-    uint totalNumberOfParticles()
+    uint totalNumberOfParticles() const
     {
         return m_particles->count();
     }

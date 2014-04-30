@@ -4,7 +4,7 @@
 
 #define REGISTER_POSITIONHANDLER(handler, type) \
 protected: \
-    handler & particles() \
+    handler & particles() const\
     { \
         return *static_cast<handler*>(&Event<type>::particles()); \
     } \
