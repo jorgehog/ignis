@@ -226,7 +226,7 @@ void MainMesh<pT>::setupChunks()
     uvec onsetTimes(Event<pT>::getTotalCounter());
     uvec offsetTimes(Event<pT>::getTotalCounter());
 
-    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
+//    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
     for (Event<pT>* event : allEvents) {      
