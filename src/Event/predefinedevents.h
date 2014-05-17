@@ -108,8 +108,9 @@ public:
 
     countAtoms() : Event<pT>("Counting atoms", "", true) {}
 
-    void execute(){
-        setValue((Event<pT>::meshField->getPopulation()/double(Event<pT>::particles().count()))/(Event<pT>::meshField->volume));
+    void execute()
+    {
+        this->setValue(Event<pT>::meshField->getPopulation()/double(Event<pT>::particles().count()));
     }
 
 };
