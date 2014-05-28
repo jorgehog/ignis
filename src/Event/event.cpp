@@ -11,7 +11,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     doOutput(doOutput),
     toFile(toFile),
     unit(unit),
-    nTimesExecuted(0),
+    m_nTimesExecuted(0),
     m_initialized(false),
     m_particles(MainMesh<pT>::currentParticles())
 {

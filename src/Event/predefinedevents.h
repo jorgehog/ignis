@@ -155,7 +155,7 @@ protected:
         double vPrev = Event<pT>::meshField->volume;
         assert(vPrev != 0 && "Can't increase volume of empty volume.(V=0)");
 
-        double dL = k*(Event<pT>::nTimesExecuted + 1.0);
+        double dL = k*(Event<pT>::m_nTimesExecuted + 1.0);
         Mat<pT> newTopology = topology0*(1 + dL);
 
         Event<pT>::meshField->setTopology(newTopology, recursive);

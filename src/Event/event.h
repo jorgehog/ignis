@@ -36,7 +36,7 @@ public:
     void _executeEvent()
     {
         execute();
-        nTimesExecuted++;
+        m_nTimesExecuted++;
     }
 
     const bool & initialized() const
@@ -63,6 +63,11 @@ public:
     void setPriority();
 
     void setManualPriority(uint p = IGNIS_UNSET_UINT);
+
+    const uint & nTimesExecuted() const
+    {
+        return m_nTimesExecuted;
+    }
 
     uint getPriority () const
     {
@@ -280,7 +285,7 @@ protected:
 
     virtual void execute() = 0;
 
-    uint nTimesExecuted;
+    uint m_nTimesExecuted;
 
     bool m_initialized;
 
