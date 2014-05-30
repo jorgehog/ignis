@@ -59,6 +59,11 @@ public:
         return id;
     }
 
+    uint getAddress() const
+    {
+        return address;
+    }
+
 
     void setPriority();
 
