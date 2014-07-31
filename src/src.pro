@@ -61,9 +61,9 @@ QMAKE_CLEAN += ../lib/lib*
 
 }
 
-DCViz {
+!NO_DCVIZ {
     LIBS += -lpython2.7
-    INCLUDEPATH += $(HOME)/code/DCViz/include /usr/include/python2.7
+    INCLUDEPATH += ../utils/DCViz/include /usr/include/python2.7
     DEFINES += USE_DCVIZ
 }
 
@@ -71,6 +71,7 @@ ccache {
     QMAKE_CXX = ccache $$QMAKE_CXX
 }
 
+QMAKE_PRE_LINK += $(MKDIR) $$PWD/../lib $$shadowed($$PWD)/../lib
 
 !equals(PWD, $${OUT_PWD}) {
     QMAKE_POST_LINK += $(COPY_DIR) $$OUT_PWD/../lib $$PWD/../
