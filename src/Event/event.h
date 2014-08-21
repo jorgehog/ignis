@@ -200,7 +200,7 @@ public:
 
     static void saveEventMatrix(std::string filepath)
     {
-        observables.save(filepath);
+        observables(span(0, *loopCycle/MainMesh<pT>::saveValuesSpacing()), span::all).eval().save(filepath);
     }
 
     static const mat &eventMatrix()
