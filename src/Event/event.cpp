@@ -51,7 +51,7 @@ void Event<pT>::storeEvent()
         return;
     }
 
-    observables(*loopCycle, id) = *value;
+    observables(*loopCycle/MainMesh<pT>::saveValuesSpacing(), id) = *value;
 
 }
 

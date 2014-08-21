@@ -31,8 +31,7 @@ public:
 
     void execute()
     {
-        //tmp
-        if (this->m_nTimesExecuted%MainMesh<pT>::nCyclesPerOutput == 0)
+        if (this->m_nTimesExecuted%MainMesh<pT>::outputSpacing() == 0)
         {
             mm->dumpEvents();
         }
@@ -58,12 +57,14 @@ public:
 
     void execute()
     {
-        mm->storeEventValues();
-
-        //TMP
-        if ((*this->loopCycle)%1000 == 0)
+        if ((*this->loopCycle)%MainMesh<pT>::saveValuesSpacing() == 0)
         {
-            Event<pT>::saveEventMatrix(mm->outputPath());
+            mm->storeEventValues();
+        }
+
+        if ((*this->loopCycle)%MainMesh<pT>::saveFileSpacing() == 0)
+        {
+            Event<pT>::saveEventMatrix(mm->outputPath() + mm->filename());
         }
     }
 

@@ -160,7 +160,7 @@ void MainMesh<pT>::setOutputPath(std::string path)
         path = path + "/";
     }
 
-    m_outputPath = path + "ignisEventsOut.arma";
+    m_outputPath = path;
 }
 
 template<typename pT>
@@ -189,6 +189,14 @@ void MainMesh<pT>::addIntrinsicEvents()
 
     if (m_doFileIO)
     {
+        if (((m_saveFileSpacing%m_saveValuesSpacing) != 0) ||
+                (m_saveFileSpacing < m_saveValuesSpacing))
+        {
+            cerr << "saving file every " << m_saveFileSpacing
+                 << " mismatch with saving values every" << m_saveValuesSpacing << " cycle.";
+            exit(1);
+        }
+
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();
         this->addEvent(*_fileio);
@@ -226,10 +234,10 @@ void MainMesh<pT>::setupChunks()
     uvec onsetTimes(Event<pT>::getTotalCounter());
     uvec offsetTimes(Event<pT>::getTotalCounter());
 
-//    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
+    //    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
-    for (Event<pT>* event : allEvents) {      
+    for (Event<pT>* event : allEvents) {
         onsetTimes(k) = event->getOnsetTime();
         offsetTimes(k) = event->getOffsetTime();
         k++;
@@ -314,7 +322,7 @@ void MainMesh<pT>::setupChunks()
         }
     }
 
-//    dumpLoopChunkInfo();
+    //    dumpLoopChunkInfo();
 
 
 }
@@ -352,16 +360,25 @@ void MainMesh<pT>::dumpEvents() const
 
 
 template<typename pT>
-uint MainMesh<pT>::nCyclesPerOutput = 1;
-
-template<typename pT>
 uint MainMesh<pT>::nCycles = 0;
 
 template<typename pT>
 bool MainMesh<pT>::m_doOutput = true;
 
 template<typename pT>
+uint MainMesh<pT>::m_outputSpacing = 1;
+
+template<typename pT>
 bool MainMesh<pT>::m_doFileIO = true;
+
+template<typename pT>
+uint MainMesh<pT>::m_saveValuesSpacing = 1;
+
+template<typename pT>
+uint MainMesh<pT>::m_saveFileSpacing = 1000;
+
+template<typename pT>
+std::string MainMesh<pT>::m_filename = "ignisEventsOut.arma";
 
 template<typename pT>
 bool MainMesh<pT>::m_reportProgress = true;

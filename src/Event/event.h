@@ -187,7 +187,7 @@ public:
     {
         assert(m_nCycles!=0 && "Unset or empty number of cycles");
 
-        observables.zeros(m_nCycles, getCounter());
+        observables.zeros(m_nCycles/MainMesh<pT>::saveValuesSpacing(), getCounter());
     }
 
     static void dumpEventMatrixData(uint k)
@@ -198,9 +198,14 @@ public:
         }
     }
 
-    static void saveEventMatrix(std::string path)
+    static void saveEventMatrix(std::string filepath)
     {
-        observables.save(path);
+        observables.save(filepath);
+    }
+
+    static const mat &eventMatrix()
+    {
+        return observables;
     }
 
     std::string dumpString();
@@ -282,7 +287,6 @@ protected:
     std::string unit;
 
     static mat observables;
-
 
     MeshField<pT> *meshField;
 

@@ -13,7 +13,6 @@ class MainMesh : public MeshField<pT>
 public:
 
     static uint nCycles;
-    static uint nCyclesPerOutput;
 
     MainMesh();
 
@@ -62,19 +61,51 @@ public:
         return m_outputPath;
     }
 
+    static const std::string &filename()
+    {
+        return m_filename;
+    }
+
     static void enableProgressReport(const bool state)
     {
         m_reportProgress = state;
     }
 
-    static void enableOutput(const bool state)
+    static void enableOutput(const bool state, const uint outputSpacing = 1)
     {
         m_doOutput = state;
+
+        m_outputSpacing = outputSpacing;
     }
 
-    static void enableEventFile(const bool state)
+    static const uint &outputSpacing()
+    {
+        return m_outputSpacing;
+    }
+
+    static void enableEventFile(const bool state,
+                                const std::string name = "ignisEventsOut.arma",
+                                const uint saveFileSpacing = 1000,
+                                const uint saveValuesSpacing = 1)
     {
         m_doFileIO = state;
+
+        m_filename = name;
+
+        m_saveValuesSpacing = saveValuesSpacing;
+
+        m_saveFileSpacing = saveFileSpacing;
+
+    }
+
+    static const uint &saveValuesSpacing()
+    {
+        return m_saveValuesSpacing;
+    }
+
+    static const uint &saveFileSpacing()
+    {
+        return m_saveFileSpacing;
     }
 
 
@@ -109,8 +140,12 @@ private:
     void dumpLoopChunkInfo();
 
     static bool m_doOutput;
+    static uint m_outputSpacing;
 
     static bool m_doFileIO;
+    static uint m_saveValuesSpacing;
+    static uint m_saveFileSpacing;
+    static std::string m_filename;
 
     static bool m_reportProgress;
 
