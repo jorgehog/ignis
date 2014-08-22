@@ -149,7 +149,10 @@ void MainMesh<pT>::eventLoop()
 
     }
 
-    Event<pT>::saveEventMatrix(outputPath());
+    if (m_doFileIO)
+    {
+        Event<pT>::saveEventMatrix(outputPath() + filename());
+    }
 
 }
 
