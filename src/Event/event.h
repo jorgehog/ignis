@@ -198,6 +198,11 @@ public:
         }
     }
 
+    static const std::vector<std::string> &outputEventDescriptions()
+    {
+        return outputTypes;
+    }
+
     static void saveEventMatrix(std::string filepath)
     {
         observables(span(0, *loopCycle/MainMesh<pT>::saveValuesSpacing()), span::all).eval().save(filepath);
