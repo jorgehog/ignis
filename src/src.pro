@@ -1,13 +1,12 @@
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += USE_DCVIZ
 #CONFIG += 2D
 
 TEMPLATE = lib 
 
 TARGET = ../lib/ignis
 
-LIBS += -larmadillo -lconfig++
+LIBS += -larmadillo
 
 DEFINES += ARMA_MAT_PREALLOC=3
 
@@ -56,18 +55,14 @@ QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS -DARMA_NO_DEBUG -DNDEBUG
 QMAKE_LFLAGS_RELEASE -= -O1
 QMAKE_LFLAGS_RELEASE += -O3
 
+INCLUDEPATH += ../utils
+
 QMAKE_CLEAN += ../lib/lib*
 
 2D  {
 
     DEFINES += IGNIS_DIM=2
 
-}
-
-!NO_DCVIZ {
-    LIBS += -lpython2.7
-    INCLUDEPATH += ../utils/DCViz/include /usr/include/python2.7
-    DEFINES += USE_DCVIZ
 }
 
 ccache {

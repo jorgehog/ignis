@@ -6,10 +6,8 @@
 
 #include "../positionhandler.h"
 
+#include <DCViz/include/DCViz.h>
 
-#ifdef USE_DCVIZ
-#include <DCViz.h>
-#endif
 
 #include <boost/lexical_cast.hpp>
 
@@ -200,30 +198,48 @@ private:
 
 };
 
-#ifdef USE_DCVIZ
 template<typename pT>
 class LauchDCViz : public Event<pT>
 {
 
 public:
 
-    LauchDCViz(std::string path, double delay) : Event<pT>("DCViz"), delay(delay), viz(path) {}
+    LauchDCViz(const std::string path,
+               const double delay = 0.0,
+               const bool dynamic = true,
+               const int sx = 16,
+               const int sy = 14) :
+        Event<pT>("DCViz"),
+        m_delay(delay),
+        m_viz(path),
+        m_dynamic(dynamic),
+        m_sx(sx),
+        m_sy(sy)
+    {
+
+    }
 
     void initialize()
     {
-        viz.launch(true, delay, 16, 14);
+        m_viz.launch(m_dynamic, m_delay, m_sx, m_sy);
     }
 
     void execute() {}
 
 private:
 
-    double delay;
+    const double m_delay;
 
-    DCViz viz;
+    DCViz m_viz;
+
+    const bool m_dynamic;
+
+    const int m_sx;
+
+    const int m_sy;
 
 };
-#endif
+
 
 class killMe : public Event<> {
 public:
