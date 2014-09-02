@@ -148,12 +148,6 @@ void MainMesh<pT>::eventLoop()
         }
 
     }
-
-    if (m_doFileIO)
-    {
-        Event<pT>::saveEventMatrix(outputPath() + filename());
-    }
-
 }
 
 template<typename pT>
@@ -339,7 +333,7 @@ void MainMesh<pT>::executeEvents()
         event->_executeEvent();
     }
 
-    for (Event<pT> * event : currentChunk->executeEvents) {
+    for (Event<pT> * event : currentChunk->resetEvents) {
         event->reset();
     }
 
