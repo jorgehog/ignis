@@ -16,9 +16,9 @@ public:
 
     MainMesh();
 
-    MainMesh(const Mat<pT> &topology);
+    MainMesh(const Mat<pT> &m_topology);
 
-    MainMesh(const std::initializer_list<pT> topology);
+    MainMesh(const std::initializer_list<pT> m_topology);
 
     virtual ~MainMesh();
 
@@ -61,51 +61,46 @@ public:
         return m_outputPath;
     }
 
-    static const std::string &filename()
+    const std::string &filename()
     {
         return m_filename;
     }
 
-    static void enableProgressReport(const bool state)
+    void enableProgressReport(const bool state)
     {
         m_reportProgress = state;
     }
 
-    static void enableOutput(const bool state, const uint outputSpacing = 1)
+    void enableOutput(const bool state, const uint outputSpacing = 1)
     {
         m_doOutput = state;
 
         m_outputSpacing = outputSpacing;
     }
 
-    static const uint &outputSpacing()
+    const uint &outputSpacing()
     {
         return m_outputSpacing;
     }
 
-    static void enableEventFile(const bool state,
-                                const std::string name = "ignisEventsOut.arma",
-                                const uint saveFileSpacing = 1000,
-                                const uint saveValuesSpacing = 1)
+    void enableEventValueStorage(const bool storeInMatrix,
+                                 const bool saveToFile,
+                                 const std::string name = "ignisEventsOut.arma",
+                                 const uint saveValuesSpacing = 1)
     {
-        m_doFileIO = state;
+        m_storeEventMatrix = storeInMatrix;
+
+        m_storeEventMatrixToFile = saveToFile;
 
         m_filename = name;
 
         m_saveValuesSpacing = saveValuesSpacing;
 
-        m_saveFileSpacing = saveFileSpacing;
-
     }
 
-    static const uint &saveValuesSpacing()
+    const uint &saveValuesSpacing()
     {
         return m_saveValuesSpacing;
-    }
-
-    static const uint &saveFileSpacing()
-    {
-        return m_saveFileSpacing;
     }
 
 
@@ -140,40 +135,41 @@ private:
 
     std::string m_outputPath;
 
-    std::vector<Event<pT> *> allEvents;
+    std::vector<Event<pT> *> m_allEvents;
 
     std::vector<Event<pT> *> m_intrinsicEvents;
 
 
     void _dumpLoopChunkInfo();
 
-    static bool m_doOutput;
-    static uint m_outputSpacing;
+    bool m_doOutput;
+    uint m_outputSpacing;
 
-    static bool m_doFileIO;
-    static uint m_saveValuesSpacing;
-    static uint m_saveFileSpacing;
-    static std::string m_filename;
+    bool m_storeEventMatrix;
+    bool m_storeEventMatrixToFile;
 
-    static bool m_reportProgress;
+    uint m_saveValuesSpacing;
+    std::string m_filename;
+
+    bool m_reportProgress;
 
     struct LoopChunk
     {
 
-        uint start;
-        uint end;
+        uint m_start;
+        uint m_end;
 
-        std::vector<Event<pT> *> executeEvents;
-        std::vector<Event<pT> *> resetEvents;
+        std::vector<Event<pT> *> m_executeEvents;
+        std::vector<Event<pT> *> m_resetEvents;
 
-        LoopChunk(uint i, uint j) : start(i), end(j) {}
+        LoopChunk(uint i, uint j) : m_start(i), m_end(j) {}
 
     };
 
 
-    std::vector<LoopChunk *> allLoopChunks;
+    std::vector<LoopChunk *> m_allLoopChunks;
 
-    LoopChunk * currentChunk;
+    LoopChunk * m_currentChunk;
 
 
 };

@@ -27,7 +27,7 @@ public:
         return m_nCycles;
     }
 
-    Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
+    Event(std::string type = "Event", std::string unit = "", bool m_hasOutput=false, bool m_storeValue=false);
 
     virtual ~Event();
 
@@ -36,7 +36,7 @@ public:
     void _executeEvent()
     {
         execute();
-        m_nTimesExecuted++;
+        m_cycle++;
     }
 
     const bool & initialized() const
@@ -56,7 +56,7 @@ public:
 
     uint getId() const
     {
-        return id;
+        return m_storageID;
     }
 
     uint getAddress() const
@@ -69,9 +69,9 @@ public:
 
     void setManualPriority(uint p = IGNIS_UNSET_UINT);
 
-    const uint & nTimesExecuted() const
+    const uint & cycle() const
     {
-        return m_nTimesExecuted;
+        return m_cycle;
     }
 
     uint getPriority () const
@@ -91,17 +91,17 @@ public:
 
     std::string getType() const
     {
-        return type;
+        return m_type;
     }
 
     bool shouldToFile() const
     {
-        return toFile;
+        return m_storeValue;
     }
 
     bool notSilent() const
     {
-        return doOutput;
+        return m_hasOutput;
     }
 
     std::string getUnit() const
@@ -128,17 +128,17 @@ public:
 
     double getMeasurement() const
     {
-        return *value;
+        return *m_value;
     }
 
 
     void setValue(double value){
-        valueInitialized = true;
-        *(this->value) = value;
+        m_valueSetThisCycle = true;
+        *(this->m_value) = value;
     }
 
     void setValue(){
-        valueInitialized = true;
+        m_valueSetThisCycle = true;
     }
 
     void setMeshField(MeshField<pT> *meshField)
@@ -203,11 +203,6 @@ public:
         return outputTypes;
     }
 
-    static void saveEventMatrix(std::string filepath)
-    {
-        observables(span(0, *loopCycle/MainMesh<pT>::saveValuesSpacing()), span::all).eval().save(filepath);
-    }
-
     static const mat &eventMatrix()
     {
         return observables;
@@ -261,37 +256,37 @@ protected:
 
     static const uint *loopCycle;
 
-
-    std::string type;
-
+    static mat observables;
 
     static std::vector<std::string> outputTypes;
 
+    static uint toFileCounter;
+
+    static uint totalCounter;
+
 
     static uint priorityCounter;
+
 
     uint priority;
 
     uint address; //! This event's index in meshfield's event array
 
 
-    static uint toFileCounter;
+    const std::string m_type;
 
-    static uint totalCounter;
+    uint m_storageID;
 
-    uint id;
+    double* m_value;
 
-    double* value;
+    bool m_valueSetThisCycle;
 
-    bool valueInitialized;
+    const bool m_hasOutput;
 
-    bool doOutput;
+    const bool m_storeValue;
 
-    bool toFile;
+    const std::string unit;
 
-    std::string unit;
-
-    static mat observables;
 
     MeshField<pT> *meshField;
 
@@ -299,7 +294,7 @@ protected:
 
     virtual void execute() = 0;
 
-    uint m_nTimesExecuted;
+    uint m_cycle;
 
     bool m_initialized;
 

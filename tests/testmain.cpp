@@ -7,6 +7,7 @@
 #include <unittest++/UnitTest++.h>
 
 using namespace ignis;
+using namespace std;
 
 double factorial(int N)
 {
@@ -25,6 +26,8 @@ TEST(setAndGet)
     Mesh::setCurrentParticles(&system);
 
     Mesh mesh = {10, 10 , 10};
+    mesh.enableOutput(false);
+
 
     SetAndGet event1;
 
@@ -44,11 +47,50 @@ TEST(setAndGet)
 }
 
 
+TEST(saveAndLoad)
+{
+    TestSystem system;
+    Mesh::setCurrentParticles(system);
+
+    Mesh mesh = {10, 10 , 10};
+
+    mesh.enableOutput(false);
+    mesh.enableEventValueStorage(true, true, "test.arma");
+
+    uint K = 10;
+    vector<SaveData*> saveDataEvents(K);
+    for (uint i = 0; i < K; ++i)
+    {
+        SaveData *saveDataEvent = new SaveData(i + 1);
+
+        mesh.addEvent(saveDataEvent);
+        saveDataEvents.push_back(saveDataEvent);
+
+    }
+
+    mesh.eventLoop();
+
+    mat loadMatrix;
+    loadMatrix.load(mesh.outputPath() + "test.arma");
+
+    for (uint i = 0; i < mesh.nCycles; ++i)
+    {
+        for (uint k = 0; k < K; ++k)
+        {
+            CHECK_EQUAL(loadMatrix(i, k), (k + 1)*i);
+        }
+    }
+
+    for (SaveData* event : saveDataEvents)
+    {
+        delete event;
+    }
+
+
+
+}
+
 int main()
 {
-
-    Mesh::enableOutput(false);
-
     return UnitTest::RunAllTests();
-
 }

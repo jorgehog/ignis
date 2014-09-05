@@ -6,9 +6,9 @@
 namespace ignis
 {
 
-class SetAndGet : public TestEvent
+class SetAndGet : public MeshEvent
 {
-    using TestEvent::TestEvent;
+    using MeshEvent::MeshEvent;
 
 
     // Event interface
@@ -40,6 +40,29 @@ protected:
 
         setValue(p);
 
+    }
+};
+
+class SaveData : public MeshEvent
+{
+public:
+
+    SaveData(const double f) :
+        MeshEvent("SaveData", "", false, true),
+        m_f(f)
+    {
+
+    }
+
+private:
+
+    const double m_f;
+
+    // Event interface
+protected:
+    void execute()
+    {
+        setValue(m_f*cycle());
     }
 };
 

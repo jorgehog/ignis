@@ -32,26 +32,26 @@ public:
     typedef typename Mat<pT>::template fixed<IGNIS_DIM, 2> topmat;
     typedef typename Col<pT>::template fixed<IGNIS_DIM>    shapevec;
 
-    MeshField(const std::string description);
+    MeshField(const std::string m_description);
 
-    MeshField(const topmat & topology, const std::string description = "meshField");
+    MeshField(const topmat & m_topology, const std::string m_description = "meshField");
 
-    MeshField(const std::initializer_list<pT> topology, const std::string description);
+    MeshField(const std::initializer_list<pT> m_topology, const std::string m_description);
 
     virtual ~MeshField();
 
-    const pT volume;
+    const pT m_volume;
 
-    const topmat topology;
+    const topmat m_topology;
 
-    const shapevec shape;
+    const shapevec m_shape;
 
-    void setTopology(const topmat &topology, bool recursive=true);
+    void setTopology(const topmat &m_topology, bool recursive=true);
 
-    void setTopology(const std::initializer_list<pT> topology, bool recursive=true);
+    void setTopology(const std::initializer_list<pT> m_topology, bool recursive=true);
 
 
-    const std::string description;
+    const std::string m_description;
 
 
     virtual bool isMainMesh () const
@@ -61,12 +61,12 @@ public:
 
     void setParent(MeshField<pT> *parent)
     {
-        this->parent = parent;
+        this->m_parent = parent;
     }
 
     MeshField<pT> *getParent ()
     {
-        return parent;
+        return m_parent;
     }
 
 
@@ -90,34 +90,34 @@ public:
 
     void removeSubField(uint i)
     {
-        subFields.erase(subFields.begin() + i);
+        m_subFields.erase(m_subFields.begin() + i);
     }
 
 
     void stretchField(double l, uint xyz);
 
-    void scaleField(const Col<pT> &oldShape, const Mat<pT> &oldTopology, const Mat<pT> &newTopology);
+    void scaleField(const Col<pT> &oldShape, const topmat &oldTopology, const topmat &newTopology);
 
 
     virtual uint getPopulation() const
     {
-        return atoms.size();
+        return m_atoms.size();
     }
 
     const std::vector<uint> & getAtoms() const
     {
-        return atoms;
+        return m_atoms;
     }
 
 
     const std::vector<MeshField*> & getSubfields() const
     {
-        return subFields;
+        return m_subFields;
     }
 
     const std::vector<Event<pT> *> & getEvents() const
     {
-        return events;
+        return m_events;
     }
 
 
@@ -132,7 +132,7 @@ protected:
 
     PositionHandler<pT> *m_particles;
 
-    MeshField<pT> *parent;
+    MeshField<pT> *m_parent;
 
 
     const pT &particles(const uint n, const uint d)
@@ -140,11 +140,11 @@ protected:
         return (*m_particles)(n, d);
     }
 
-    std::vector<uint> atoms;
+    std::vector<uint> m_atoms;
 
-    std::vector<Event<pT>* > events;
+    std::vector<Event<pT>* > m_events;
 
-    std::vector<MeshField<pT>* > subFields;
+    std::vector<MeshField<pT>* > m_subFields;
 
 
     virtual void _sendToTop(Event<pT> & event);
@@ -165,7 +165,7 @@ protected:
 
     void resetContents()
     {
-        atoms.clear();
+        m_atoms.clear();
     }
 
 };

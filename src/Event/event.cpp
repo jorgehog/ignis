@@ -1,17 +1,19 @@
 #include "event.h"
 
+#include <BADAss/badass.h>
+
 using namespace ignis;
 
 template<typename pT>
 Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
-    type(type),
     priority(IGNIS_UNSET_UINT),
-    value(new double(0)),
-    valueInitialized(false),
-    doOutput(doOutput),
-    toFile(toFile),
+    m_type(type),
+    m_value(new double(0)),
+    m_valueSetThisCycle(false),
+    m_hasOutput(doOutput),
+    m_storeValue(toFile),
     unit(unit),
-    m_nTimesExecuted(0),
+    m_cycle(0),
     m_initialized(false),
     m_registeredHandler(MainMesh<pT>::currentParticles())
 {
@@ -22,7 +24,7 @@ template<typename pT>
 Event<pT>::~Event()
 {
     totalCounter--;
-    delete value;
+    delete m_value;
 }
 
 template<typename pT>
@@ -47,20 +49,24 @@ void Event<pT>::resetEventParameters()
 template<typename pT>
 void Event<pT>::storeEvent()
 {
-    if (!toFile) {
+    if (!m_storeValue)
+    {
         return;
     }
 
-    observables(*loopCycle/MainMesh<pT>::saveValuesSpacing(), id) = *value;
+    observables(*loopCycle/MainMesh<pT>::saveValuesSpacing(), m_storageID) = *m_value;
+
+
 
 }
 
 template<typename pT>
 void Event<pT>::setOutputVariables()
 {
-    if (toFile) {
-        id = toFileCounter++;
-        outputTypes.push_back(type + ("@" + meshField->description));
+    if (m_storeValue)
+    {
+        m_storageID = toFileCounter++;
+        outputTypes.push_back(m_type + ("@" + meshField->m_description));
     }
 }
 
@@ -101,12 +107,12 @@ std::string Event<pT>::dumpString()
     stringstream s, tail;
 
     s << left
-      << "<" << setw(20) << type << " "
-      << "@" << setw(30) << meshField->description;
+      << "<" << setw(20) << m_type << " "
+      << "@" << setw(30) << meshField->m_description;
 
-    if (valueInitialized){
+    if (m_valueSetThisCycle){
         tail << "value: " << setprecision(3) << getMeasurement() << " " << unit;
-        valueInitialized = false;
+        m_valueSetThisCycle = false;
     }
 
     tail << " >";

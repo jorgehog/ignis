@@ -39,24 +39,24 @@ public:
         using namespace std;
 
         for (uint i = 0; i < registeredHandler().count(); ++i) {
-            if (registeredHandler()(i, 0) < meshField->topology(0, 0)) {
-                registeredHandler()(i, 0) += meshField->shape(0);
+            if (registeredHandler()(i, 0) < meshField->m_topology(0, 0)) {
+                registeredHandler()(i, 0) += meshField->m_shape(0);
             }
-            registeredHandler()(i, 0) = meshField->topology(0, 0) +
-                    fmod(registeredHandler()(i, 0) - meshField->topology(0, 0), meshField->shape(0));
+            registeredHandler()(i, 0) = meshField->m_topology(0, 0) +
+                    fmod(registeredHandler()(i, 0) - meshField->m_topology(0, 0), meshField->m_shape(0));
 
-            if (registeredHandler()(i, 1) < meshField->topology(1, 0)) {
-                registeredHandler()(i, 1) += meshField->shape(1);
+            if (registeredHandler()(i, 1) < meshField->m_topology(1, 0)) {
+                registeredHandler()(i, 1) += meshField->m_shape(1);
             }
-            registeredHandler()(i, 1) = meshField->topology(1, 0) +
-                    fmod(registeredHandler()(i, 1) - meshField->topology(1, 0), meshField->shape(1));
+            registeredHandler()(i, 1) = meshField->m_topology(1, 0) +
+                    fmod(registeredHandler()(i, 1) - meshField->m_topology(1, 0), meshField->m_shape(1));
 
 #if IGNIS_DIM == 3
-            if (registeredHandler()(i, 2) < meshField->topology(2, 0)) {
-                registeredHandler()(i, 2) += meshField->shape(2);
+            if (registeredHandler()(i, 2) < meshField->m_topology(2, 0)) {
+                registeredHandler()(i, 2) += meshField->m_shape(2);
             }
-            registeredHandler()(i, 2) = meshField->topology(2, 0) +
-                    fmod(registeredHandler()(i, 2), meshField->shape(2));
+            registeredHandler()(i, 2) = meshField->m_topology(2, 0) +
+                    fmod(registeredHandler()(i, 2), meshField->m_shape(2));
 
 #endif
         }
@@ -82,7 +82,7 @@ public:
 
         for (uint i = 0; i < Event<pT>::registeredHandler().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                Event<pT>::registeredHandler()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
+                Event<pT>::registeredHandler()(j, i) = Event<pT>::meshField->m_topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->m_shape(j));
             }
         }
     }
@@ -129,8 +129,8 @@ public:
 
     void initialize() {
 
-        topology0 = Event<pT>::meshField->topology;
-        volume0   = Event<pT>::meshField->volume;
+        topology0 = Event<pT>::meshField->m_topology;
+        volume0   = Event<pT>::meshField->m_volume;
 
         k = (pow(ratio, 1.0/IGNIS_DIM) - 1)/Event<pT>::eventLength;
 
@@ -150,15 +150,15 @@ private:
 protected:
     void execute() {
 
-        double vPrev = Event<pT>::meshField->volume;
+        double vPrev = Event<pT>::meshField->m_volume;
         assert(vPrev != 0 && "Can't increase volume of empty volume.(V=0)");
 
-        double dL = k*(Event<pT>::m_nTimesExecuted + 1.0);
+        double dL = k*(Event<pT>::m_cycle + 1.0);
         Mat<pT> newTopology = topology0*(1 + dL);
 
         Event<pT>::meshField->setTopology(newTopology, recursive);
 
-        pT vNew = Event<pT>::meshField->volume;
+        pT vNew = Event<pT>::meshField->m_volume;
         assert(vNew != 0 && "Volume changed to zero");
 
         pT scale = (pT)pow(vNew/(double)vPrev, 1.0/IGNIS_DIM);
@@ -180,8 +180,8 @@ public:
         if ((*Event<pT>::loopCycle % freq) == 0) {
 
             scaledPos = Event<pT>::registeredHandler();
-            scaledPos.col(0)/=Event<pT>::meshField->shape(0);
-            scaledPos.col(1)/=Event<pT>::meshField->shape(1);
+            scaledPos.col(0)/=Event<pT>::meshField->m_shape(0);
+            scaledPos.col(1)/=Event<pT>::meshField->m_shape(1);
 
             std::stringstream s;
             s << path << "/ignisPos" << *Event<pT>::loopCycle << ".arma";
@@ -276,7 +276,7 @@ public:
     density() : Event<>("Density", "", true, true) {}
 
     void execute() {
-        setValue(meshField->getPopulation()/(double)meshField->volume);
+        setValue(meshField->getPopulation()/(double)meshField->m_volume);
     }
 
 };

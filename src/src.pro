@@ -1,5 +1,5 @@
-CONFIG -= app_bundle
-CONFIG -= qt
+include(../defaults.pri)
+
 #CONFIG += 2D
 
 TEMPLATE = lib 

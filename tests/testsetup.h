@@ -33,9 +33,4 @@ public:
     }
 };
 
-class TestEvent : public MeshEvent
-{
-    using MeshEvent::MeshEvent;
-};
-
 }
