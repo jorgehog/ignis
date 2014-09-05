@@ -25,7 +25,7 @@ template<typename pT>
 class periodicScaling : public Event<pT> {
 public:
 
-    using Event<pT>::particles;
+    using Event<pT>::registeredHandler;
     using Event<pT>::meshField;
 
     periodicScaling() : Event<pT>("PeriodicRescale") {}
@@ -38,25 +38,25 @@ public:
 
         using namespace std;
 
-        for (uint i = 0; i < particles().count(); ++i) {
-            if (particles()(i, 0) < meshField->topology(0, 0)) {
-                particles()(i, 0) += meshField->shape(0);
+        for (uint i = 0; i < registeredHandler().count(); ++i) {
+            if (registeredHandler()(i, 0) < meshField->topology(0, 0)) {
+                registeredHandler()(i, 0) += meshField->shape(0);
             }
-            particles()(i, 0) = meshField->topology(0, 0) +
-                    fmod(particles()(i, 0) - meshField->topology(0, 0), meshField->shape(0));
+            registeredHandler()(i, 0) = meshField->topology(0, 0) +
+                    fmod(registeredHandler()(i, 0) - meshField->topology(0, 0), meshField->shape(0));
 
-            if (particles()(i, 1) < meshField->topology(1, 0)) {
-                particles()(i, 1) += meshField->shape(1);
+            if (registeredHandler()(i, 1) < meshField->topology(1, 0)) {
+                registeredHandler()(i, 1) += meshField->shape(1);
             }
-            particles()(i, 1) = meshField->topology(1, 0) +
-                    fmod(particles()(i, 1) - meshField->topology(1, 0), meshField->shape(1));
+            registeredHandler()(i, 1) = meshField->topology(1, 0) +
+                    fmod(registeredHandler()(i, 1) - meshField->topology(1, 0), meshField->shape(1));
 
 #if IGNIS_DIM == 3
-            if (particles()(i, 2) < meshField->topology(2, 0)) {
-                particles()(i, 2) += meshField->shape(2);
+            if (registeredHandler()(i, 2) < meshField->topology(2, 0)) {
+                registeredHandler()(i, 2) += meshField->shape(2);
             }
-            particles()(i, 2) = meshField->topology(2, 0) +
-                    fmod(particles()(i, 2), meshField->shape(2));
+            registeredHandler()(i, 2) = meshField->topology(2, 0) +
+                    fmod(registeredHandler()(i, 2), meshField->shape(2));
 
 #endif
         }
@@ -80,9 +80,9 @@ public:
 
     void execute() {
 
-        for (uint i = 0; i < Event<pT>::particles().count(); ++i) {
+        for (uint i = 0; i < Event<pT>::registeredHandler().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                Event<pT>::particles()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
+                Event<pT>::registeredHandler()(j, i) = Event<pT>::meshField->topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->shape(j));
             }
         }
     }
@@ -108,7 +108,7 @@ public:
 
     void execute()
     {
-        this->setValue(Event<pT>::meshField->getPopulation()/double(Event<pT>::particles().count()));
+        this->setValue(Event<pT>::meshField->getPopulation()/double(Event<pT>::registeredHandler().count()));
     }
 
 };
@@ -163,7 +163,7 @@ protected:
 
         pT scale = (pT)pow(vNew/(double)vPrev, 1.0/IGNIS_DIM);
         for (const uint & i : Event<pT>::meshField->getAtoms()) {
-            Event<pT>::particles().vec(i) *= scale;
+            Event<pT>::registeredHandler().vec(i) *= scale;
         }
     }
 
@@ -179,7 +179,7 @@ public:
     void execute() {
         if ((*Event<pT>::loopCycle % freq) == 0) {
 
-            scaledPos = Event<pT>::particles();
+            scaledPos = Event<pT>::registeredHandler();
             scaledPos.col(0)/=Event<pT>::meshField->shape(0);
             scaledPos.col(1)/=Event<pT>::meshField->shape(1);
 

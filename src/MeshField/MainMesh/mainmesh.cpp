@@ -33,6 +33,11 @@ template<typename pT>
 MainMesh<pT>::~MainMesh()
 {
 
+    for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
+    {
+        delete intrinsicEvent;
+    }
+
     for (LoopChunk *lc : allLoopChunks)
     {
         delete lc;
@@ -60,7 +65,7 @@ uint MainMesh<pT>::getPopulation() const
 }
 
 template<typename pT>
-void MainMesh<pT>::updateContainments()
+void MainMesh<pT>::_updateContainments()
 {
 
     for (MeshField<pT> *subField : this->subFields)
@@ -81,7 +86,7 @@ void MainMesh<pT>::updateContainments()
 }
 
 template<typename pT>
-void MainMesh<pT>::dumpLoopChunkInfo()
+void MainMesh<pT>::_dumpLoopChunkInfo()
 {
 
     using namespace std;
@@ -119,7 +124,7 @@ template<typename pT>
 void MainMesh<pT>::eventLoop()
 {
 
-    addIntrinsicEvents();
+    _addIntrinsicEvents();
 
     uint* loopCycle = new uint(0);
 
@@ -129,30 +134,26 @@ void MainMesh<pT>::eventLoop()
 
     this->prepareEvents();
 
-    sortEvents();
+    _sortEvents();
 
-    setupChunks();
+    _setupChunks();
 
     for (LoopChunk* loopChunk : allLoopChunks) {
 
         currentChunk = loopChunk;
 
-        initializeNewEvents();
+        _initializeNewEvents();
 
-        for (*loopCycle = currentChunk->start; *loopCycle <= currentChunk->end; ++(*loopCycle)) {
+        for (*loopCycle = currentChunk->start; *loopCycle <= currentChunk->end; ++(*loopCycle))
+        {
+            _updateContainments();
 
-            updateContainments();
-
-            executeEvents();
-
+            _executeEvents();
         }
 
     }
 
-    if (m_doFileIO)
-    {
-        Event<pT>::saveEventMatrix(outputPath() + filename());
-    }
+    delete loopCycle;
 
 }
 
@@ -167,30 +168,30 @@ void MainMesh<pT>::setOutputPath(std::string path)
 }
 
 template<typename pT>
-void MainMesh<pT>::sendToTop(Event<pT> &event)
+void MainMesh<pT>::_sendToTop(Event<pT> &event)
 {
     allEvents.push_back(&event);
 }
 
 template<typename pT>
-void MainMesh<pT>::addIntrinsicEvents()
+void MainMesh<pT>::_addIntrinsicEvents()
 {
 
     if (m_reportProgress)
     {
         _reportProgress<pT> *_prog = new _reportProgress<pT>();
         _prog->setManualPriority();
-        this->addEvent(*_prog);
+        this->_addIntrinsicEvent(_prog);
     }
 
     if (m_doOutput)
     {
         _dumpEvents<pT> *_stdout = new _dumpEvents<pT>(this);
         _stdout->setManualPriority();
-        this->addEvent(*_stdout);
+        this->_addIntrinsicEvent(_stdout);
     }
 
-    if (m_doFileIO)
+    if (m_doFileIO && Event<pT>::getCounter() != 0)
     {
         if (((m_saveFileSpacing%m_saveValuesSpacing) != 0) ||
                 (m_saveFileSpacing < m_saveValuesSpacing))
@@ -202,13 +203,13 @@ void MainMesh<pT>::addIntrinsicEvents()
 
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();
-        this->addEvent(*_fileio);
+        this->_addIntrinsicEvent(_fileio);
     }
 
 }
 
 template<typename pT>
-void MainMesh<pT>::sortEvents()
+void MainMesh<pT>::_sortEvents()
 {
     std::sort(allEvents.begin(),
               allEvents.end(),
@@ -217,7 +218,7 @@ void MainMesh<pT>::sortEvents()
 
 
 template<typename pT>
-void MainMesh<pT>::initializeNewEvents()
+void MainMesh<pT>::_initializeNewEvents()
 {
     for (Event<pT>* event : currentChunk->executeEvents) {
 
@@ -231,7 +232,7 @@ void MainMesh<pT>::initializeNewEvents()
 
 
 template<typename pT>
-void MainMesh<pT>::setupChunks()
+void MainMesh<pT>::_setupChunks()
 {
 
     uvec onsetTimes(Event<pT>::getTotalCounter());
@@ -332,7 +333,7 @@ void MainMesh<pT>::setupChunks()
 
 
 template<typename pT>
-void MainMesh<pT>::executeEvents()
+void MainMesh<pT>::_executeEvents()
 {
 
     for (Event<pT> * event : currentChunk->executeEvents) {

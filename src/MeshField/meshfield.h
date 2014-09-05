@@ -147,7 +147,7 @@ protected:
     std::vector<MeshField<pT>* > subFields;
 
 
-    virtual void sendToTop(Event<pT> & event);
+    virtual void _sendToTop(Event<pT> & event);
 
 
     //This should be executed from the MainMesh,
@@ -172,12 +172,9 @@ protected:
 
 
 typedef MeshField<double> meshfield;
-
 typedef MeshField<float>  fmeshfield;
-
-typedef MeshField<uint>   lattice;
-
-typedef MeshField<int>    ilattice;
+typedef MeshField<uint>   latticefield;
+typedef MeshField<int>    ilatticefield;
 
 
 }

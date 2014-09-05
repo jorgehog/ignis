@@ -111,22 +111,28 @@ public:
 
 private:
 
-    void sendToTop(Event<pT> &event);
+    void _sendToTop(Event<pT> &event);
 
 
-    void addIntrinsicEvents();
+    void _addIntrinsicEvents();
 
 
-    void sortEvents();
+    void _sortEvents();
 
-    void initializeNewEvents();
+    void _initializeNewEvents();
 
-    void setupChunks();
+    void _setupChunks();
 
-    void executeEvents();
+    void _executeEvents();
 
 
-    void updateContainments();
+    void _updateContainments();
+
+    void _addIntrinsicEvent(Event<pT> *event)
+    {
+        this->addEvent(event);
+        m_intrinsicEvents.push_back(event);
+    }
 
 
     static PositionHandler<pT> *m_currentParticles;
@@ -136,8 +142,10 @@ private:
 
     std::vector<Event<pT> *> allEvents;
 
+    std::vector<Event<pT> *> m_intrinsicEvents;
 
-    void dumpLoopChunkInfo();
+
+    void _dumpLoopChunkInfo();
 
     static bool m_doOutput;
     static uint m_outputSpacing;
@@ -170,9 +178,10 @@ private:
 
 };
 
-typedef MainMesh<uint>  MainLattice;
-typedef MainMesh<int>   iMainLattice;
-typedef MainMesh<float> fMainLattice;
+typedef MainMesh<double> Mesh;
+typedef MainMesh<float>  fMesh;
+typedef MainMesh<int>    iLattice;
+typedef MainMesh<uint>   Lattice;
 
 }
 

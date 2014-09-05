@@ -35,11 +35,6 @@ MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::st
 template<typename pT>
 MeshField<pT>::~MeshField()
 {
-    for (Event<pT> *event : events)
-    {
-        delete event;
-    }
-
     for (MeshField<pT> *meshField : subFields)
     {
         delete meshField;
@@ -94,7 +89,7 @@ void MeshField<pT>::prepareEvents()
     {
         event->setPriority();
 
-        sendToTop(*event);
+        _sendToTop(*event);
 
         event->setExplicitTimes();
 
@@ -122,9 +117,9 @@ bool MeshField<pT>::append(uint i)
 }
 
 template<typename pT>
-void MeshField<pT>::sendToTop(Event<pT> &event)
+void MeshField<pT>::_sendToTop(Event<pT> &event)
 {
-    parent->sendToTop(event);
+    parent->_sendToTop(event);
 }
 
 template<typename pT>
@@ -239,6 +234,8 @@ void MeshField<pT>::setTopology(const std::initializer_list<pT> topology, bool r
     const topmat *newTop = new topmat(topology);
 
     setTopology(*newTop, recursive);
+
+    delete newTop;
 
 }
 

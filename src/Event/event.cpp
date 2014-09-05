@@ -13,7 +13,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     unit(unit),
     m_nTimesExecuted(0),
     m_initialized(false),
-    m_particles(MainMesh<pT>::currentParticles())
+    m_registeredHandler(MainMesh<pT>::currentParticles())
 {
     totalCounter++;
 }

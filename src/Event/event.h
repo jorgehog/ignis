@@ -309,28 +309,38 @@ protected:
     uint offsetTime = IGNIS_UNSET_UINT;
 
 
-    const pT &particles(const uint n, const uint d) const
+    const pT registeredHandler(const uint n, const uint d) const
     {
-        return (*m_particles)(n, d);
+        return (*m_registeredHandler)(n, d);
     }
 
-    PositionHandler<pT> & particles() const
+    pT &registeredHandler(const uint n, const uint d)
     {
-        return *m_particles;
+        return (*m_registeredHandler)(n, d);
+    }
+
+    PositionHandler<pT> & registeredHandler() const
+    {
+        return *m_registeredHandler;
     }
 
     uint totalNumberOfParticles() const
     {
-        return m_particles->count();
+        return m_registeredHandler->count();
     }
 
 private:
 
-    PositionHandler<pT> *m_particles;
+    PositionHandler<pT> *m_registeredHandler;
 
 };
 
-#include "event.cpp"
+typedef Event<double> MeshEvent;
+typedef Event<float>  fMeshEvent;
+typedef Event<int>    iLatticeEvent;
+typedef Event<uint>   LatticeEvent;
 
 }
+
+#include "event.cpp"
 
