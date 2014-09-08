@@ -17,7 +17,6 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     m_registeredHandler(MainMesh<pT>::currentParticles())
 {
     m_refCounter++;
-    cout << type << " " << m_refCounter << endl;
 }
 
 template<typename pT>

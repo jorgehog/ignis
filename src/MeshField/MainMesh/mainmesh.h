@@ -81,6 +81,7 @@ public:
     void enableEventValueStorage(const bool storeInMatrix,
                                  const bool saveToFile,
                                  const std::string name = "ignisEventsOut.arma",
+                                 const std::string path = "/tmp",
                                  const uint saveValuesSpacing = 1)
     {
         m_storeEventMatrix = storeInMatrix;
@@ -88,6 +89,8 @@ public:
         m_storeEventMatrixToFile = saveToFile;
 
         m_filename = name;
+
+        setOutputPath(path);
 
         m_saveValuesSpacing = saveValuesSpacing;
 

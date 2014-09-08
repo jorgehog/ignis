@@ -120,6 +120,7 @@ template<typename pT>
 void MainMesh<pT>::_streamValueToFile(const double value)
 {
     (void) value;
+    observables.save(m_outputPath + m_filename);
 }
 
 template<typename pT>
@@ -351,7 +352,7 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-    _dumpLoopChunkInfo();
+//    _dumpLoopChunkInfo();
 
 
 }
