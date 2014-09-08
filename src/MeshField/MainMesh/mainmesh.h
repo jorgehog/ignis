@@ -3,6 +3,8 @@
 
 #include "../meshfield.h"
 
+#include <fstream>
+
 namespace ignis
 {
 
@@ -11,8 +13,6 @@ class MainMesh : public MeshField<pT>
 {
 
 public:
-
-    static uint nCycles;
 
     MainMesh();
 
@@ -23,7 +23,6 @@ public:
     virtual ~MainMesh();
 
     void onConstruct();
-
 
     uint getPopulation() const;
 
@@ -48,85 +47,100 @@ public:
         return m_currentParticles;
     }
 
-    void eventLoop();
+    void eventLoop(const uint nCycles);
 
     void setOutputPath(std::string path);
 
     void dumpEvents() const;
-
-    void storeEventValues() const;
 
     std::string outputPath() const
     {
         return m_outputPath;
     }
 
-    static const std::string &filename()
+    const std::string &filename()
     {
         return m_filename;
     }
 
-    static void enableProgressReport(const bool state)
+    void enableProgressReport(const bool state)
     {
         m_reportProgress = state;
     }
 
-    static void enableOutput(const bool state, const uint outputSpacing = 1)
+    void enableOutput(const bool state, const uint outputSpacing = 1)
     {
         m_doOutput = state;
 
         m_outputSpacing = outputSpacing;
     }
 
-    static const uint &outputSpacing()
+    const uint &outputSpacing()
     {
         return m_outputSpacing;
     }
 
-    static void enableEventFile(const bool state,
-                                const std::string name = "ignisEventsOut.arma",
-                                const uint saveFileSpacing = 1000,
-                                const uint saveValuesSpacing = 1)
+    void enableEventValueStorage(const bool store,
+                                 const bool saveToFile,
+                                 const std::string name = "ignisEventsOut.arma",
+                                 const std::string path = "/tmp",
+                                 const uint saveValuesSpacing = 1)
     {
-        m_doFileIO = state;
+        m_storeEvents = store;
+
+        m_storeEventsToFile = saveToFile;
 
         m_filename = name;
 
-        m_saveValuesSpacing = saveValuesSpacing;
+        setOutputPath(path);
 
-        m_saveFileSpacing = saveFileSpacing;
+        m_saveValuesSpacing = saveValuesSpacing;
 
     }
 
-    static const uint &saveValuesSpacing()
+    const uint &saveValuesSpacing()
     {
         return m_saveValuesSpacing;
     }
 
-    static const uint &saveFileSpacing()
+    uint numberOfStoredEvents() const
     {
-        return m_saveFileSpacing;
+        return m_storageEnabledEvents.size();
     }
+
+
+    void _initializeEventStorage(const uint size);
+
+    void _storeEventValues(const uint index);
 
 
 private:
 
-    void sendToTop(Event<pT> &event);
+    mat m_storedEventValues;
+
+    std::vector<std::string> m_storedEventTypes;
+
+    std::ofstream m_eventStorageFile;
+
+    const std::vector<std::string> &outputEventDescriptions()
+    {
+        return m_storedEventTypes;
+    }
+
+    const mat &storedEventValues()
+    {
+        return m_storedEventValues;
+    }
 
 
-    void addIntrinsicEvents();
+    void dumpStoredEvent(uint k)
+    {
+        for (uint i = 0; i < numberOfStoredEvents(); ++i)
+        {
+            cout << std::setw(30) << std::left << m_storedEventTypes.at(i) << "  " << std::setw(10) << m_storedEventValues(k, i) << endl;
+        }
+    }
 
-
-    void sortEvents();
-
-    void initializeNewEvents();
-
-    void setupChunks();
-
-    void executeEvents();
-
-
-    void updateContainments();
 
 
     static PositionHandler<pT> *m_currentParticles;
@@ -134,45 +148,78 @@ private:
 
     std::string m_outputPath;
 
-    std::vector<Event<pT> *> allEvents;
+    std::vector<Event<pT> *> m_allEvents;
+
+    std::vector<Event<pT> *> m_intrinsicEvents;
+
+    std::vector<Event<pT> *> m_storageEnabledEvents;
 
 
-    void dumpLoopChunkInfo();
+    void _dumpLoopChunkInfo();
 
-    static bool m_doOutput;
-    static uint m_outputSpacing;
+    bool m_doOutput;
+    uint m_outputSpacing;
 
-    static bool m_doFileIO;
-    static uint m_saveValuesSpacing;
-    static uint m_saveFileSpacing;
-    static std::string m_filename;
+    bool m_storeEvents;
+    bool m_storeEventsToFile;
 
-    static bool m_reportProgress;
+    uint m_saveValuesSpacing;
+    std::string m_filename;
+
+    bool m_reportProgress;
 
     struct LoopChunk
     {
 
-        uint start;
-        uint end;
+        uint m_start;
+        uint m_end;
 
-        std::vector<Event<pT> *> executeEvents;
-        std::vector<Event<pT> *> resetEvents;
+        std::vector<Event<pT> *> m_executeEvents;
+        std::vector<Event<pT> *> m_resetEvents;
 
-        LoopChunk(uint i, uint j) : start(i), end(j) {}
+        LoopChunk(uint i, uint j) : m_start(i), m_end(j) {}
 
     };
 
 
-    std::vector<LoopChunk *> allLoopChunks;
+    std::vector<LoopChunk *> m_allLoopChunks;
 
-    LoopChunk * currentChunk;
+    LoopChunk * m_currentChunk;
+
+    void _streamValueToFile(const double value);
+
+    void _sendToTop(Event<pT> &event);
+
+
+    void _addIntrinsicEvents();
+
+
+    void _sortEvents();
+
+    void _initializeNewEvents();
+
+    void _setupChunks();
+
+    void _executeEvents();
+
+
+    void _updateContainments();
+
+    void _addIntrinsicEvent(Event<pT> *event)
+    {
+        this->addEvent(event);
+        m_intrinsicEvents.push_back(event);
+    }
+
+    void _finalize();
 
 
 };
 
-typedef MainMesh<uint>  MainLattice;
-typedef MainMesh<int>   iMainLattice;
-typedef MainMesh<float> fMainLattice;
+typedef MainMesh<double> Mesh;
+typedef MainMesh<float>  fMesh;
+typedef MainMesh<int>    iLattice;
+typedef MainMesh<uint>   Lattice;
 
 }
 

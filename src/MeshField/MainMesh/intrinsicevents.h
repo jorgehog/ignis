@@ -12,13 +12,13 @@ class _reportProgress : public Event<pT>
 {
 public:
 
-    using Event<pT>::loopCycle;
+    using Event<pT>::m_loopCycle;
     using Event<pT>::m_nCycles;
 
     _reportProgress() : Event<pT>("Progress", "%", true) {}
 
     void execute() {
-        this->setValue(*loopCycle*100.0/m_nCycles);
+        this->setValue(*m_loopCycle*100.0/m_nCycles);
     }
 };
 
@@ -31,7 +31,7 @@ public:
 
     void execute()
     {
-        if (this->m_nTimesExecuted%MainMesh<pT>::outputSpacing() == 0)
+        if (this->m_cycle%mm->outputSpacing() == 0)
         {
             mm->dumpEvents();
         }
@@ -48,29 +48,25 @@ class _dumpEventsToFile : public Event<pT>
 {
 public:
 
-    _dumpEventsToFile(MainMesh<pT>* mm) : Event<pT>("INTRINSIC_EVENT_FILEDUMP"), mm(mm) {}
+    _dumpEventsToFile(MainMesh<pT>* mm) : Event<pT>("INTRINSIC_EVENT_FILEDUMP"), m_mm(mm) {}
 
     void initialize()
     {
-        Event<pT>::initializeEventMatrix();
+        m_mm->_initializeEventStorage(this->m_nCycles/m_mm->saveValuesSpacing());
     }
 
     void execute()
     {
-        if ((*this->loopCycle)%MainMesh<pT>::saveValuesSpacing() == 0)
+        if ((*this->m_loopCycle)%m_mm->saveValuesSpacing() == 0)
         {
-            mm->storeEventValues();
+            m_mm->_storeEventValues(*this->m_loopCycle/m_mm->saveValuesSpacing());
         }
 
-        if ((*this->loopCycle)%MainMesh<pT>::saveFileSpacing() == 0)
-        {
-            Event<pT>::saveEventMatrix(mm->outputPath() + mm->filename());
-        }
     }
 
 private:
 
-    MainMesh<pT> *mm;
+    MainMesh<pT> *m_mm;
 
 };
 

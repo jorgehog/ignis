@@ -4,3 +4,5 @@ CONFIG -= qt
 CONFIG += ordered
 
 SUBDIRS += DCViz
+
+HEADERS += BADAss/badass.h

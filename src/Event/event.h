@@ -8,7 +8,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <assert.h>
+#include "BADAss/badass.h"
 
 
 namespace ignis
@@ -22,24 +22,17 @@ class Event
 {
 public:
 
-    static const uint & nCycles()
-    {
-        return m_nCycles;
-    }
-
-    Event(std::string type = "Event", std::string unit = "", bool doOutput=false, bool toFile=false);
+    Event(std::string type = "Event", std::string m_unit = "", bool m_hasOutput=false, bool m_storeValue=false);
 
     virtual ~Event();
-
-    static void resetEventParameters();
 
     void _executeEvent()
     {
         execute();
-        m_nTimesExecuted++;
+        m_cycle++;
     }
 
-    const bool & initialized() const
+    const bool &initialized() const
     {
         return m_initialized;
     }
@@ -54,164 +47,115 @@ public:
     virtual void reset(){}
 
 
-    uint getId() const
+    uint meshAddress() const
     {
-        return id;
+        return m_meshAddress;
     }
 
-    uint getAddress() const
+    const uint & nCycles()
     {
-        return address;
+        return m_nCycles;
+    }
+
+    const MeshField<pT> &meshField() const
+    {
+        return *m_meshField;
     }
 
 
-    void setPriority();
+    void _setPriority();
 
     void setManualPriority(uint p = IGNIS_UNSET_UINT);
 
-    const uint & nTimesExecuted() const
+    const uint &cycle() const
     {
-        return m_nTimesExecuted;
+        return m_cycle;
     }
 
-    uint getPriority () const
+    const uint &priority() const
     {
-        return priority;
+        return m_priority;
     }
 
-    static const uint & getPriorityCounter()
+    static const uint &priorityCounter()
     {
-        return priorityCounter;
+        return m_priorityCounter;
     }
 
-    static const uint & getTotalCounter()
+    static const uint &refCounter()
     {
-        return totalCounter;
+        return m_refCounter;
     }
 
-    std::string getType() const
+    const std::string type() const
     {
-        return type;
+        return m_type;
     }
 
-    bool shouldToFile() const
+    const bool &storeValue() const
     {
-        return toFile;
+        return m_storeValue;
     }
 
     bool notSilent() const
     {
-        return doOutput;
+        return m_hasOutput;
     }
 
-    std::string getUnit() const
+    std::string unit() const
     {
-        return unit;
+        return m_unit;
     }
 
-    static uint getCounter()
+    uint onsetTime() const
     {
-        return toFileCounter;
+        return m_onsetTime;
     }
 
-
-    uint getOnsetTime() const
+    uint offsetTime() const
     {
-        return onsetTime;
+        return m_offsetTime;
     }
 
-    uint getOffsetTime() const
+
+    double value() const
     {
-        return offsetTime;
+        return *m_value;
     }
 
 
-    double getMeasurement() const
+    void setValue(double value)
     {
-        return *value;
+        m_valueSetThisCycle = true;
+        *(this->m_value) = value;
     }
 
-
-    void setValue(double value){
-        valueInitialized = true;
-        *(this->value) = value;
-    }
-
-    void setValue(){
-        valueInitialized = true;
+    void setValue()
+    {
+        m_valueSetThisCycle = true;
     }
 
     void setMeshField(MeshField<pT> *meshField)
     {
-        this->meshField = meshField;
+        this->m_meshField = meshField;
     }
 
-    static void setNumberOfCycles(uint & N){
-        Event<pT>::m_nCycles = N;
-    }
-
-    static void setLoopCyclePtr(const uint* loopCycle){
-        Event<pT>::loopCycle = loopCycle;
-    }
-
-    void setAddress(uint i) {
-        address = i;
-    }
-
-    void setExplicitTimes()
+    void _setNumberOfCycles(const uint nCycles)
     {
-
-        if (onsetTime == IGNIS_UNSET_UINT) {
-            setOnsetTime(0);
-        }
-
-        if (offsetTime == IGNIS_UNSET_UINT) {
-            setOffsetTime(m_nCycles-1);
-        }
-
-        eventLength = offsetTime - onsetTime;
-
-        assert(offsetTime >= onsetTime);
-        assert(offsetTime < m_nCycles);
-        assert(onsetTime < m_nCycles);
-
+        m_nCycles = nCycles;
     }
 
-
-
-    void storeEvent();
-
-    void setOutputVariables();
-
-    static void initializeEventMatrix()
+    void _setLoopCyclePtrePtr(const uint* loopCycle)
     {
-        assert(m_nCycles!=0 && "Unset or empty number of cycles");
-
-        observables.zeros(m_nCycles/MainMesh<pT>::saveValuesSpacing(), getCounter());
+        m_loopCycle = loopCycle;
     }
 
-    static void dumpEventMatrixData(uint k)
+    void setAddress(uint i)
     {
-        for (uint i = 0; i < getCounter(); ++i)
-        {
-            cout << std::setw(30) << std::left << outputTypes.at(i) << "  " << std::setw(10) << observables(k, i) << endl;
-        }
+        m_meshAddress = i;
     }
 
-    static const std::vector<std::string> &outputEventDescriptions()
-    {
-        return outputTypes;
-    }
-
-    static void saveEventMatrix(std::string filepath)
-    {
-        observables(span(0, *loopCycle/MainMesh<pT>::saveValuesSpacing()), span::all).eval().save(filepath);
-    }
-
-    static const mat &eventMatrix()
-    {
-        return observables;
-    }
+    void _setExplicitTimes();
 
     std::string dumpString();
 
@@ -220,7 +164,7 @@ public:
 
         if (onsetTime == IGNIS_UNSET_UINT) return;
 
-        this->onsetTime = onsetTime;
+        this->m_onsetTime = onsetTime;
 
     }
 
@@ -228,7 +172,7 @@ public:
     {
 
         if (offTime == IGNIS_UNSET_UINT) return;
-        offsetTime = offTime;
+        m_offsetTime = offTime;
 
     }
 
@@ -252,85 +196,87 @@ public:
         return true;
     }
 
-    uint eventLength = IGNIS_UNSET_UINT;
+    uint m_eventLength = IGNIS_UNSET_UINT;
 
 
 protected:
 
-    static uint m_nCycles;
+    uint m_nCycles;
 
-    static const uint *loopCycle;
+    const uint *m_loopCycle;
 
-
-    std::string type;
-
-
-    static std::vector<std::string> outputTypes;
+    static uint m_refCounter;
 
 
-    static uint priorityCounter;
-
-    uint priority;
-
-    uint address; //! This event's index in meshfield's event array
+    static uint m_priorityCounter;
 
 
-    static uint toFileCounter;
+    uint m_priority;
 
-    static uint totalCounter;
+    uint m_meshAddress; //! This event's index in meshfield's event array
 
-    uint id;
 
-    double* value;
+    const std::string m_type;
 
-    bool valueInitialized;
+    double* m_value;
 
-    bool doOutput;
+    bool m_valueSetThisCycle;
 
-    bool toFile;
+    const bool m_hasOutput;
 
-    std::string unit;
+    const bool m_storeValue;
 
-    static mat observables;
+    const std::string m_unit;
 
-    MeshField<pT> *meshField;
+
+    MeshField<pT> *m_meshField;
 
 
 
     virtual void execute() = 0;
 
-    uint m_nTimesExecuted;
+    uint m_cycle;
 
     bool m_initialized;
 
 
-    uint onsetTime = IGNIS_UNSET_UINT;
+    uint m_onsetTime = IGNIS_UNSET_UINT;
 
-    uint offsetTime = IGNIS_UNSET_UINT;
+    uint m_offsetTime = IGNIS_UNSET_UINT;
 
 
-    const pT &particles(const uint n, const uint d) const
+    const pT registeredHandler(const uint n, const uint d) const
     {
-        return (*m_particles)(n, d);
+        return (*m_registeredHandler)(n, d);
     }
 
-    PositionHandler<pT> & particles() const
+    pT &registeredHandler(const uint n, const uint d)
     {
-        return *m_particles;
+        return (*m_registeredHandler)(n, d);
+    }
+
+    PositionHandler<pT> & registeredHandler() const
+    {
+        return *m_registeredHandler;
     }
 
     uint totalNumberOfParticles() const
     {
-        return m_particles->count();
+        return m_registeredHandler->count();
     }
 
 private:
 
-    PositionHandler<pT> *m_particles;
+    PositionHandler<pT> *m_registeredHandler;
 
 };
 
-#include "event.cpp"
+typedef Event<double> MeshEvent;
+typedef Event<float>  fMeshEvent;
+typedef Event<int>    iLatticeEvent;
+typedef Event<uint>   LatticeEvent;
 
 }
+
+#include "event.cpp"
 

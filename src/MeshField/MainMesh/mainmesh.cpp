@@ -4,7 +4,6 @@
 
 #include <iomanip>
 
-
 using namespace ignis;
 
 
@@ -33,11 +32,6 @@ template<typename pT>
 MainMesh<pT>::~MainMesh()
 {
 
-    for (LoopChunk *lc : allLoopChunks)
-    {
-        delete lc;
-    }
-
 }
 
 template<typename pT>
@@ -45,11 +39,11 @@ void MainMesh<pT>::onConstruct()
 {
     setOutputPath("/tmp/");
 
-    assert(m_currentParticles != NULL);
+    BADAss(m_currentParticles, !=, NULL);
 
     for (uint i = 0; i < m_currentParticles->count(); ++i)
     {
-        this->atoms.push_back(i);
+        this->m_atoms.push_back(i);
     }
 }
 
@@ -60,10 +54,10 @@ uint MainMesh<pT>::getPopulation() const
 }
 
 template<typename pT>
-void MainMesh<pT>::updateContainments()
+void MainMesh<pT>::_updateContainments()
 {
 
-    for (MeshField<pT> *subField : this->subFields)
+    for (MeshField<pT> *subField : this->m_subFields)
     {
         subField->resetSubFields();
     }
@@ -71,7 +65,7 @@ void MainMesh<pT>::updateContainments()
     for (uint i = 0; i < this->m_particles->count(); ++i)
     {
 
-        for (MeshField<pT> *subField : this->subFields)
+        for (MeshField<pT> *subField : this->m_subFields)
         {
             (void)subField->checkSubFields(i);
         }
@@ -81,21 +75,51 @@ void MainMesh<pT>::updateContainments()
 }
 
 template<typename pT>
-void MainMesh<pT>::dumpLoopChunkInfo()
+void MainMesh<pT>::_finalize()
+{
+    for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
+    {
+        delete intrinsicEvent;
+    }
+
+    m_intrinsicEvents.clear();
+
+
+    for (LoopChunk *lc : m_allLoopChunks)
+    {
+        delete lc;
+    }
+
+    m_allLoopChunks.clear();
+
+    m_allEvents.clear();
+
+
+    m_storageEnabledEvents.clear();
+
+    if (m_eventStorageFile.is_open())
+    {
+        m_eventStorageFile.close();
+    }
+
+}
+
+template<typename pT>
+void MainMesh<pT>::_dumpLoopChunkInfo()
 {
 
     using namespace std;
 
-    for (LoopChunk * loopChunk : allLoopChunks) {
+    for (LoopChunk * loopChunk : m_allLoopChunks) {
 
-        cout << "Loopchunk interval: [" << loopChunk->start << " " << loopChunk->end << "]" << endl;
-        cout << "has " << loopChunk->executeEvents.size() << " events: " << endl;
-        for (Event<pT>* event : loopChunk->executeEvents) {
-            cout << "  " << setw(2) << right << event->getPriority() << "  "
-                 << setw(30) << left << event->getType()
+        cout << "Loopchunk interval: [" << loopChunk->m_start << " " << loopChunk->m_end << "]" << endl;
+        cout << "has " << loopChunk->m_executeEvents.size() << " events: " << endl;
+        for (Event<pT>* event : loopChunk->m_executeEvents) {
+            cout << "  " << setw(2) << right << event->priority() << "  "
+                 << setw(30) << left << event->type()
                  << "["
-                 << setw(5) << event->getOnsetTime() << " "
-                 << setw(5) << event->getOffsetTime()
+                 << setw(5) << event->onsetTime() << " "
+                 << setw(5) << event->offsetTime()
                  << "]"
                  << endl;
         }
@@ -104,50 +128,97 @@ void MainMesh<pT>::dumpLoopChunkInfo()
 }
 
 template<typename pT>
-void MainMesh<pT>::storeEventValues() const
+void MainMesh<pT>::_streamValueToFile(const double value)
+{
+    BADAssBool(m_eventStorageFile.is_open(), "event file is not open but asked to write.");
+
+    m_eventStorageFile.write(reinterpret_cast<const char*>(&value), sizeof(double));
+}
+
+template<typename pT>
+void MainMesh<pT>::_storeEventValues(const uint index)
 {
 
-    for (Event<pT>* event: currentChunk->executeEvents)
+    for (uint i = 0; i < numberOfStoredEvents(); ++i)
     {
-        event->storeEvent();
+        const double &value = m_storageEnabledEvents.at(i)->value();
+
+        if (m_storeEvents)
+        {
+            m_storedEventValues(index, i) = value;
+        }
+
+        if (m_storeEventsToFile)
+        {
+            this->_streamValueToFile(value);
+        }
+
     }
 
 }
 
 
 template<typename pT>
-void MainMesh<pT>::eventLoop()
+void MainMesh<pT>::_initializeEventStorage(const uint size)
 {
 
-    addIntrinsicEvents();
+    for (Event<pT> *event : m_storageEnabledEvents)
+    {
+        m_storedEventTypes.push_back(event->type() + ("@" + event->meshField().description()));
+    }
 
+    if (m_storeEvents)
+    {
+        m_storedEventValues.zeros(size, numberOfStoredEvents());
+    }
+
+    if (m_storeEventsToFile)
+    {
+        m_eventStorageFile.open(m_outputPath + m_filename, std::ios::binary);
+
+        uint nCols = m_storageEnabledEvents.size();
+
+        m_eventStorageFile.write(reinterpret_cast<const char*>(&size), sizeof(uint));
+        m_eventStorageFile.write(reinterpret_cast<const char*>(&nCols), sizeof(uint));
+
+    }
+}
+
+template<typename pT>
+void MainMesh<pT>::eventLoop(const uint nCycles)
+{
     uint* loopCycle = new uint(0);
 
-    Event<pT>::setNumberOfCycles(nCycles);
+    _addIntrinsicEvents();
 
-    Event<pT>::setLoopCyclePtr(loopCycle);
+    this->_prepareEvents(nCycles, loopCycle);
 
-    this->prepareEvents();
+    _sortEvents();
 
-    sortEvents();
+    _setupChunks();
 
-    setupChunks();
+    for (LoopChunk* loopChunk : m_allLoopChunks) {
 
-    for (LoopChunk* loopChunk : allLoopChunks) {
+        m_currentChunk = loopChunk;
 
-        currentChunk = loopChunk;
+        _initializeNewEvents();
 
-        initializeNewEvents();
+        for (*loopCycle = m_currentChunk->m_start; *loopCycle <= m_currentChunk->m_end; ++(*loopCycle))
+        {
+            _updateContainments();
 
-        for (*loopCycle = currentChunk->start; *loopCycle <= currentChunk->end; ++(*loopCycle)) {
-
-            updateContainments();
-
-            executeEvents();
-
+            _executeEvents();
         }
 
     }
+<<<<<<< HEAD
+=======
+
+    delete loopCycle;
+
+    _finalize();
+
+>>>>>>> 017ba8f4c6315bd540beae2bed5f23d9f8bb8aa3
 }
 
 template<typename pT>
@@ -161,59 +232,56 @@ void MainMesh<pT>::setOutputPath(std::string path)
 }
 
 template<typename pT>
-void MainMesh<pT>::sendToTop(Event<pT> &event)
+void MainMesh<pT>::_sendToTop(Event<pT> &event)
 {
-    allEvents.push_back(&event);
+    m_allEvents.push_back(&event);
+
+    if (event.storeValue())
+    {
+        m_storageEnabledEvents.push_back(&event);
+    }
 }
 
 template<typename pT>
-void MainMesh<pT>::addIntrinsicEvents()
+void MainMesh<pT>::_addIntrinsicEvents()
 {
 
     if (m_reportProgress)
     {
         _reportProgress<pT> *_prog = new _reportProgress<pT>();
         _prog->setManualPriority();
-        this->addEvent(*_prog);
+        this->_addIntrinsicEvent(_prog);
     }
 
     if (m_doOutput)
     {
         _dumpEvents<pT> *_stdout = new _dumpEvents<pT>(this);
         _stdout->setManualPriority();
-        this->addEvent(*_stdout);
+        this->_addIntrinsicEvent(_stdout);
     }
 
-    if (m_doFileIO)
+    if (m_storeEvents)
     {
-        if (((m_saveFileSpacing%m_saveValuesSpacing) != 0) ||
-                (m_saveFileSpacing < m_saveValuesSpacing))
-        {
-            cerr << "saving file every " << m_saveFileSpacing
-                 << " mismatch with saving values every" << m_saveValuesSpacing << " cycle.";
-            exit(1);
-        }
-
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();
-        this->addEvent(*_fileio);
+        this->_addIntrinsicEvent(_fileio);
     }
 
 }
 
 template<typename pT>
-void MainMesh<pT>::sortEvents()
+void MainMesh<pT>::_sortEvents()
 {
-    std::sort(allEvents.begin(),
-              allEvents.end(),
-              [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->getPriority() < e2->getPriority();});
+    std::sort(m_allEvents.begin(),
+              m_allEvents.end(),
+              [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->priority() < e2->priority();});
 }
 
 
 template<typename pT>
-void MainMesh<pT>::initializeNewEvents()
+void MainMesh<pT>::_initializeNewEvents()
 {
-    for (Event<pT>* event : currentChunk->executeEvents) {
+    for (Event<pT>* event : m_currentChunk->m_executeEvents) {
 
         if (!event->initialized())
         {
@@ -225,25 +293,24 @@ void MainMesh<pT>::initializeNewEvents()
 
 
 template<typename pT>
-void MainMesh<pT>::setupChunks()
+void MainMesh<pT>::_setupChunks()
 {
 
-    uvec onsetTimes(Event<pT>::getTotalCounter());
-    uvec offsetTimes(Event<pT>::getTotalCounter());
+    uvec onsetTimes(Event<pT>::refCounter());
+    uvec offsetTimes(Event<pT>::refCounter());
 
     //    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
-    for (Event<pT>* event : allEvents) {
-        onsetTimes(k) = event->getOnsetTime();
-        offsetTimes(k) = event->getOffsetTime();
+    for (Event<pT>* event : m_allEvents)
+    {
+        onsetTimes(k) = event->onsetTime();
+        offsetTimes(k) = event->offsetTime();
         k++;
     }
 
     onsetTimes = unique(onsetTimes);
     offsetTimes = unique(offsetTimes);
-
-
 
     uint start = onsetTimes(0);
     uint end;
@@ -277,7 +344,7 @@ void MainMesh<pT>::setupChunks()
             if (offsetTime <= end)
             {
                 //                if (debug) cout << "adding interval " << start << " - " << offsetTime << endl;
-                allLoopChunks.push_back(new LoopChunk(start, offsetTime));
+                m_allLoopChunks.push_back(new LoopChunk(start, offsetTime));
                 start = offsetTime + 1;
                 //                if (debug) cout << "next interval starting at " << start << endl;
 
@@ -294,7 +361,7 @@ void MainMesh<pT>::setupChunks()
         if (start < end)
         {
             //            if (debug) cout << "adding remaining interval " << start << " - " << end << endl;
-            allLoopChunks.push_back(new LoopChunk(start, end));
+            m_allLoopChunks.push_back(new LoopChunk(start, end));
             start = end + 1;
         }
         //        if (debug) cout << "------------------------\n";
@@ -303,37 +370,37 @@ void MainMesh<pT>::setupChunks()
 
 
 
-    for (Event<pT>* event : allEvents) {
-        for (LoopChunk* loopChunk : allLoopChunks) {
-            if (event->getOnsetTime() <= loopChunk->start && event->getOffsetTime() >= loopChunk->end) {
+    for (Event<pT>* event : m_allEvents) {
+        for (LoopChunk* loopChunk : m_allLoopChunks) {
+            if (event->onsetTime() <= loopChunk->m_start && event->offsetTime() >= loopChunk->m_end) {
 
                 if (event->_hasExecuteImpl()) {
-                    loopChunk->executeEvents.push_back(event);
+                    loopChunk->m_executeEvents.push_back(event);
                 }
 
                 if (event->_hasResetImpl()) {
-                    loopChunk->resetEvents.push_back(event);
+                    loopChunk->m_resetEvents.push_back(event);
                 }
 
             }
         }
     }
 
-    //    dumpLoopChunkInfo();
+//    _dumpLoopChunkInfo();
 
 
 }
 
 
 template<typename pT>
-void MainMesh<pT>::executeEvents()
+void MainMesh<pT>::_executeEvents()
 {
 
-    for (Event<pT> * event : currentChunk->executeEvents) {
+    for (Event<pT> * event : m_currentChunk->m_executeEvents) {
         event->_executeEvent();
     }
 
-    for (Event<pT> * event : currentChunk->resetEvents) {
+    for (Event<pT> * event : m_currentChunk->m_resetEvents) {
         event->reset();
     }
 
@@ -343,7 +410,7 @@ template<typename pT>
 void MainMesh<pT>::dumpEvents() const
 {
 
-    for (Event<pT>* event : currentChunk->executeEvents)
+    for (Event<pT>* event : m_currentChunk->m_executeEvents)
     {
         if (event->notSilent())
         {
@@ -353,32 +420,6 @@ void MainMesh<pT>::dumpEvents() const
 
     cout << endl;
 }
-
-
-
-template<typename pT>
-uint MainMesh<pT>::nCycles = 0;
-
-template<typename pT>
-bool MainMesh<pT>::m_doOutput = true;
-
-template<typename pT>
-uint MainMesh<pT>::m_outputSpacing = 1;
-
-template<typename pT>
-bool MainMesh<pT>::m_doFileIO = true;
-
-template<typename pT>
-uint MainMesh<pT>::m_saveValuesSpacing = 1;
-
-template<typename pT>
-uint MainMesh<pT>::m_saveFileSpacing = 1000;
-
-template<typename pT>
-std::string MainMesh<pT>::m_filename = "ignisEventsOut.arma";
-
-template<typename pT>
-bool MainMesh<pT>::m_reportProgress = true;
 
 template<typename pT>
 PositionHandler<pT> *MainMesh<pT>::m_currentParticles = NULL;

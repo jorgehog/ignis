@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS = utils src #tests
+SUBDIRS = utils src tests
 
 CONFIG += ordered
 

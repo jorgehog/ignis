@@ -4,14 +4,14 @@
 
 #define REGISTER_POSITIONHANDLER(handler, type) \
 protected: \
-    handler & particles() const\
+    handler & registeredHandler() const\
     { \
-        return *static_cast<handler*>(&Event<type>::particles()); \
+        return *static_cast<handler*>(&Event<type>::registeredHandler()); \
     } \
     \
-    type particles(const uint n, const uint d) \
+    type registeredHandler(const uint n, const uint d) \
     {\
-        return particles()(n, d);\
+        return registeredHandler()(n, d);\
     }\
 \
 private: \
@@ -34,15 +34,7 @@ public:
 
     virtual pT operator() (const uint n, const uint d) const = 0;
 
-    virtual pT &operator() (const uint n, const uint d)
-    {
-        (void) n;
-        (void) d;
-
-        throw std::runtime_error("Current implementation does not support setting of position data. Please override set operator.");
-
-        return *(new pT());
-    }
+    virtual pT &operator() (const uint n, const uint d) = 0;
 
 
     colType & vec(const uint n) const
