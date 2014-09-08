@@ -6,6 +6,9 @@ TEMPLATE = lib
 
 TARGET = ../lib/ignis
 
+VERSION = 2.0.0
+
+
 HEADERS += \
     defines.h \
     Particles/particles.h \
