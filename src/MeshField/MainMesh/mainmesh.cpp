@@ -211,14 +211,11 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
         }
 
     }
-<<<<<<< HEAD
-=======
 
     delete loopCycle;
 
     _finalize();
 
->>>>>>> 017ba8f4c6315bd540beae2bed5f23d9f8bb8aa3
 }
 
 template<typename pT>
