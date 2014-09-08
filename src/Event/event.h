@@ -107,16 +107,20 @@ public:
         return m_unit;
     }
 
-    uint onsetTime() const
+    const uint &onsetTime() const
     {
         return m_onsetTime;
     }
 
-    uint offsetTime() const
+    const uint &offsetTime() const
     {
         return m_offsetTime;
     }
 
+    const uint &eventLength() const
+    {
+        return m_eventLength;
+    }
 
     double value() const
     {
@@ -196,10 +200,11 @@ public:
         return true;
     }
 
-    uint m_eventLength = IGNIS_UNSET_UINT;
 
 
 protected:
+
+    uint m_eventLength;
 
     uint m_nCycles;
 

@@ -4,6 +4,7 @@ using namespace ignis;
 
 template<typename pT>
 Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
+    m_eventLength(IGNIS_UNSET_UINT),
     m_nCycles(IGNIS_UNSET_UINT),
     m_priority(IGNIS_UNSET_UINT),
     m_type(type),

@@ -47,6 +47,26 @@ public:
         return m_currentParticles;
     }
 
+
+    const std::vector<std::string> &outputEventDescriptions()
+    {
+        return m_storedEventTypes;
+    }
+
+    const mat &storedEventValues()
+    {
+        return m_storedEventValues;
+    }
+
+
+    void dumpStoredEvent(uint k)
+    {
+        for (uint i = 0; i < numberOfStoredEvents(); ++i)
+        {
+            cout << std::setw(30) << std::left << m_storedEventTypes.at(i) << "  " << std::setw(10) << m_storedEventValues(k, i) << endl;
+        }
+    }
+
     void eventLoop(const uint nCycles);
 
     void setOutputPath(std::string path);
@@ -116,35 +136,13 @@ public:
 
 private:
 
+    static PositionHandler<pT> *m_currentParticles;
+
     mat m_storedEventValues;
 
     std::vector<std::string> m_storedEventTypes;
 
     std::ofstream m_eventStorageFile;
-
-    const std::vector<std::string> &outputEventDescriptions()
-    {
-        return m_storedEventTypes;
-    }
-
-    const mat &storedEventValues()
-    {
-        return m_storedEventValues;
-    }
-
-
-    void dumpStoredEvent(uint k)
-    {
-        for (uint i = 0; i < numberOfStoredEvents(); ++i)
-        {
-            cout << std::setw(30) << std::left << m_storedEventTypes.at(i) << "  " << std::setw(10) << m_storedEventValues(k, i) << endl;
-        }
-    }
-
-
-
-    static PositionHandler<pT> *m_currentParticles;
-
 
     std::string m_outputPath;
 
