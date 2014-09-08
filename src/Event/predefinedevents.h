@@ -26,7 +26,7 @@ class periodicScaling : public Event<pT> {
 public:
 
     using Event<pT>::registeredHandler;
-    using Event<pT>::meshField;
+    using Event<pT>::m_meshField;
 
     periodicScaling() : Event<pT>("PeriodicRescale") {}
 
@@ -39,24 +39,24 @@ public:
         using namespace std;
 
         for (uint i = 0; i < registeredHandler().count(); ++i) {
-            if (registeredHandler()(i, 0) < meshField->m_topology(0, 0)) {
-                registeredHandler()(i, 0) += meshField->m_shape(0);
+            if (registeredHandler()(i, 0) < m_meshField->m_topology(0, 0)) {
+                registeredHandler()(i, 0) += m_meshField->m_shape(0);
             }
-            registeredHandler()(i, 0) = meshField->m_topology(0, 0) +
-                    fmod(registeredHandler()(i, 0) - meshField->m_topology(0, 0), meshField->m_shape(0));
+            registeredHandler()(i, 0) = m_meshField->m_topology(0, 0) +
+                    fmod(registeredHandler()(i, 0) - m_meshField->m_topology(0, 0), m_meshField->m_shape(0));
 
-            if (registeredHandler()(i, 1) < meshField->m_topology(1, 0)) {
-                registeredHandler()(i, 1) += meshField->m_shape(1);
+            if (registeredHandler()(i, 1) < m_meshField->m_topology(1, 0)) {
+                registeredHandler()(i, 1) += m_meshField->m_shape(1);
             }
-            registeredHandler()(i, 1) = meshField->m_topology(1, 0) +
-                    fmod(registeredHandler()(i, 1) - meshField->m_topology(1, 0), meshField->m_shape(1));
+            registeredHandler()(i, 1) = m_meshField->m_topology(1, 0) +
+                    fmod(registeredHandler()(i, 1) - m_meshField->m_topology(1, 0), m_meshField->m_shape(1));
 
 #if IGNIS_DIM == 3
-            if (registeredHandler()(i, 2) < meshField->m_topology(2, 0)) {
-                registeredHandler()(i, 2) += meshField->m_shape(2);
+            if (registeredHandler()(i, 2) < m_meshField->m_topology(2, 0)) {
+                registeredHandler()(i, 2) += m_meshField->m_shape(2);
             }
-            registeredHandler()(i, 2) = meshField->m_topology(2, 0) +
-                    fmod(registeredHandler()(i, 2), meshField->m_shape(2));
+            registeredHandler()(i, 2) = m_meshField->m_topology(2, 0) +
+                    fmod(registeredHandler()(i, 2), m_meshField->m_shape(2));
 
 #endif
         }
@@ -82,7 +82,7 @@ public:
 
         for (uint i = 0; i < Event<pT>::registeredHandler().count(); ++i) {
             for (uint j = 0; j < IGNIS_DIM; ++j) {
-                Event<pT>::registeredHandler()(j, i) = Event<pT>::meshField->m_topology(j, 0) + (pT)(drand48()*Event<pT>::meshField->m_shape(j));
+                Event<pT>::registeredHandler()(j, i) = Event<pT>::m_meshField->m_topology(j, 0) + (pT)(drand48()*Event<pT>::m_meshField->m_shape(j));
             }
         }
     }
@@ -108,7 +108,7 @@ public:
 
     void execute()
     {
-        this->setValue(Event<pT>::meshField->getPopulation()/double(Event<pT>::registeredHandler().count()));
+        this->setValue(Event<pT>::m_meshField->getPopulation()/double(Event<pT>::registeredHandler().count()));
     }
 
 };
@@ -129,10 +129,10 @@ public:
 
     void initialize() {
 
-        topology0 = Event<pT>::meshField->m_topology;
-        volume0   = Event<pT>::meshField->m_volume;
+        topology0 = Event<pT>::m_meshField->m_topology;
+        volume0   = Event<pT>::m_meshField->m_volume;
 
-        k = (pow(ratio, 1.0/IGNIS_DIM) - 1)/Event<pT>::eventLength;
+        k = (pow(ratio, 1.0/IGNIS_DIM) - 1)/Event<pT>::m_eventLength;
 
     }
 
@@ -150,19 +150,19 @@ private:
 protected:
     void execute() {
 
-        double vPrev = Event<pT>::meshField->m_volume;
+        double vPrev = Event<pT>::m_meshField->m_volume;
         assert(vPrev != 0 && "Can't increase volume of empty volume.(V=0)");
 
         double dL = k*(Event<pT>::m_cycle + 1.0);
         Mat<pT> newTopology = topology0*(1 + dL);
 
-        Event<pT>::meshField->setTopology(newTopology, recursive);
+        Event<pT>::m_meshField->setTopology(newTopology, recursive);
 
-        pT vNew = Event<pT>::meshField->m_volume;
+        pT vNew = Event<pT>::m_meshField->m_volume;
         assert(vNew != 0 && "Volume changed to zero");
 
         pT scale = (pT)pow(vNew/(double)vPrev, 1.0/IGNIS_DIM);
-        for (const uint & i : Event<pT>::meshField->getAtoms()) {
+        for (const uint & i : Event<pT>::m_meshField->getAtoms()) {
             Event<pT>::registeredHandler().vec(i) *= scale;
         }
     }
@@ -177,14 +177,14 @@ public:
     SaveToFile(std::string path, uint freq) : Event<pT>("SaveData"), path(path), freq(freq) {}
 
     void execute() {
-        if ((*Event<pT>::loopCycle % freq) == 0) {
+        if ((*Event<pT>::m_loopCycle % freq) == 0) {
 
             scaledPos = Event<pT>::registeredHandler();
-            scaledPos.col(0)/=Event<pT>::meshField->m_shape(0);
-            scaledPos.col(1)/=Event<pT>::meshField->m_shape(1);
+            scaledPos.col(0)/=Event<pT>::m_meshField->m_shape(0);
+            scaledPos.col(1)/=Event<pT>::m_meshField->m_shape(1);
 
             std::stringstream s;
-            s << path << "/ignisPos" << *Event<pT>::loopCycle << ".arma";
+            s << path << "/ignisPos" << *Event<pT>::m_loopCycle << ".arma";
             scaledPos.save(s.str());
         }
     }
@@ -276,7 +276,7 @@ public:
     density() : Event<>("Density", "", true, true) {}
 
     void execute() {
-        setValue(meshField->getPopulation()/(double)meshField->m_volume);
+        setValue(m_meshField->getPopulation()/(double)m_meshField->m_volume);
     }
 
 };

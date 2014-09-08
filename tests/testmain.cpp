@@ -25,7 +25,7 @@ TEST(setAndGet)
 
     Mesh::setCurrentParticles(&system);
 
-    Mesh mesh = {10, 10 , 10};
+    Mesh mesh = {10, 10, 10};
     mesh.enableOutput(false);
 
 
@@ -33,22 +33,23 @@ TEST(setAndGet)
 
     mesh.addEvent(event1);
 
-    mesh.nCycles = 5;
-
-    mesh.eventLoop();
+    mesh.eventLoop(5);
 
     const uint D = IGNIS_DIM;
     const uint N = system.count();
 
     double CF = D*(D+1)/2*N*(N+1)/2;
 
-    CHECK_CLOSE(CF, event1.getMeasurement(), 1E-1);
+    CHECK_CLOSE(CF, event1.value(), 1E-1);
 
 }
 
 
 TEST(saveAndLoad)
 {
+
+    mat loadMatrix;
+
     TestSystem system;
     Mesh::setCurrentParticles(system);
 
@@ -68,12 +69,18 @@ TEST(saveAndLoad)
 
     }
 
-    mesh.eventLoop();
+    string path = mesh.outputPath() + "test.arma";
 
-    mat loadMatrix;
-    loadMatrix.load(mesh.outputPath() + "test.arma");
+    loadMatrix.save(path);
 
-    for (uint i = 0; i < mesh.nCycles; ++i)
+    uint nCycles = 5;
+    mesh.eventLoop(nCycles);
+
+    loadMatrix.load(path);
+
+    cout << loadMatrix << endl;
+
+    for (uint i = 0; i < nCycles; ++i)
     {
         for (uint k = 0; k < K; ++k)
         {
@@ -85,8 +92,6 @@ TEST(saveAndLoad)
     {
         delete event;
     }
-
-
 
 }
 

@@ -12,8 +12,6 @@ class MainMesh : public MeshField<pT>
 
 public:
 
-    static uint nCycles;
-
     MainMesh();
 
     MainMesh(const Mat<pT> &m_topology);
@@ -23,7 +21,6 @@ public:
     virtual ~MainMesh();
 
     void onConstruct();
-
 
     uint getPopulation() const;
 
@@ -48,13 +45,11 @@ public:
         return m_currentParticles;
     }
 
-    void eventLoop();
+    void eventLoop(const uint nCycles);
 
     void setOutputPath(std::string path);
 
     void dumpEvents() const;
-
-    void storeEventValues() const;
 
     std::string outputPath() const
     {
@@ -103,31 +98,50 @@ public:
         return m_saveValuesSpacing;
     }
 
+    uint numberOfStoredEvents() const
+    {
+        return m_storeEvents.size();
+    }
+
+    void _initializeEventMatrix(const uint size)
+    {
+        observables.zeros(size, numberOfStoredEvents());
+    }
+
+
+    void _storeEventValues(const uint index);
+
 
 private:
 
-    void _sendToTop(Event<pT> &event);
+    mat observables;
 
+    std::vector<std::string> outputTypes;
 
-    void _addIntrinsicEvents();
+    uint toFileCounter;
 
-
-    void _sortEvents();
-
-    void _initializeNewEvents();
-
-    void _setupChunks();
-
-    void _executeEvents();
-
-
-    void _updateContainments();
-
-    void _addIntrinsicEvent(Event<pT> *event)
+    const std::vector<std::string> &outputEventDescriptions()
     {
-        this->addEvent(event);
-        m_intrinsicEvents.push_back(event);
+        return outputTypes;
     }
+
+    const mat &eventMatrix()
+    {
+        return observables;
+    }
+
+
+    void dumpEventMatrixData(uint k)
+    {
+        for (uint i = 0; i < numberOfStoredEvents(); ++i)
+        {
+            cout << std::setw(30) << std::left << outputTypes.at(i) << "  " << std::setw(10) << observables(k, i) << endl;
+        }
+    }
+
+
+    void setOutputVariables();
+
 
 
     static PositionHandler<pT> *m_currentParticles;
@@ -138,6 +152,8 @@ private:
     std::vector<Event<pT> *> m_allEvents;
 
     std::vector<Event<pT> *> m_intrinsicEvents;
+
+    std::vector<Event<pT> *> m_storeEvents;
 
 
     void _dumpLoopChunkInfo();
@@ -170,6 +186,31 @@ private:
     std::vector<LoopChunk *> m_allLoopChunks;
 
     LoopChunk * m_currentChunk;
+
+    void _streamValueToFile(const double value);
+
+    void _sendToTop(Event<pT> &event);
+
+
+    void _addIntrinsicEvents();
+
+
+    void _sortEvents();
+
+    void _initializeNewEvents();
+
+    void _setupChunks();
+
+    void _executeEvents();
+
+
+    void _updateContainments();
+
+    void _addIntrinsicEvent(Event<pT> *event)
+    {
+        this->addEvent(event);
+        m_intrinsicEvents.push_back(event);
+    }
 
 
 };

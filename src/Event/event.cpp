@@ -1,86 +1,46 @@
 #include "event.h"
 
-#include <BADAss/badass.h>
-
 using namespace ignis;
 
 template<typename pT>
 Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile):
-    priority(IGNIS_UNSET_UINT),
+    m_nCycles(IGNIS_UNSET_UINT),
+    m_priority(IGNIS_UNSET_UINT),
     m_type(type),
     m_value(new double(0)),
     m_valueSetThisCycle(false),
     m_hasOutput(doOutput),
     m_storeValue(toFile),
-    unit(unit),
+    m_unit(unit),
     m_cycle(0),
     m_initialized(false),
     m_registeredHandler(MainMesh<pT>::currentParticles())
 {
-    totalCounter++;
+    m_refCounter++;
+    cout << type << " " << m_refCounter << endl;
 }
 
 template<typename pT>
 Event<pT>::~Event()
 {
-    totalCounter--;
+    m_refCounter--;
+
+    if (m_refCounter == 0)
+    {
+        m_priorityCounter = 0;
+    }
+
     delete m_value;
 }
 
-template<typename pT>
-void Event<pT>::resetEventParameters()
-{
-    if (totalCounter != 0)
-    {
-        throw std::runtime_error("Cannot reset events: Some events are still active.");
-    }
-
-
-    outputTypes.clear();
-
-    observables.clear();
-
-    toFileCounter = 0;
-    priorityCounter = 0;
-
-}
-
 
 template<typename pT>
-void Event<pT>::storeEvent()
+void Event<pT>::_setPriority()
 {
-    if (!m_storeValue)
+    if (m_priority == IGNIS_UNSET_UINT)
     {
-        return;
+        m_priority = m_priorityCounter++;
     }
-
-    observables(*loopCycle/MainMesh<pT>::saveValuesSpacing(), m_storageID) = *m_value;
-
-
-
-}
-
-template<typename pT>
-void Event<pT>::setOutputVariables()
-{
-    if (m_storeValue)
-    {
-        m_storageID = toFileCounter++;
-        outputTypes.push_back(m_type + ("@" + meshField->m_description));
-    }
-}
-
-template<typename pT>
-void Event<pT>::setPriority()
-{
-
-    if (priority == IGNIS_UNSET_UINT)
-    {
-
-        priority = priorityCounter++;
-
-    }
-
 }
 
 template<typename pT>
@@ -88,14 +48,38 @@ void Event<pT>::setManualPriority(uint p)
 {
     if (p == IGNIS_UNSET_UINT)
     {
-        priority = totalCounter;
+        m_priority = m_refCounter - 1;
     }
 
     else
     {
-        priority = p;
+        m_priority = p;
         //SHIFT GREATER EQUAL + 1
     }
+}
+
+template<typename pT>
+void Event<pT>::_setExplicitTimes()
+{
+
+    BADAss(m_nCycles, !=, IGNIS_UNSET_UINT, "Unset number of cycles.");
+
+    if (m_onsetTime == IGNIS_UNSET_UINT)
+    {
+        setOnsetTime(0);
+    }
+
+    if (m_offsetTime == IGNIS_UNSET_UINT)
+    {
+        setOffsetTime(m_nCycles-1);
+    }
+
+    m_eventLength = m_offsetTime - m_onsetTime;
+
+    BADAss(m_offsetTime, >=, m_onsetTime);
+    BADAss(m_offsetTime, <, m_nCycles);
+    BADAss(m_onsetTime, <, m_nCycles);
+
 }
 
 
@@ -108,10 +92,10 @@ std::string Event<pT>::dumpString()
 
     s << left
       << "<" << setw(20) << m_type << " "
-      << "@" << setw(30) << meshField->m_description;
+      << "@" << setw(30) << m_meshField->m_description;
 
     if (m_valueSetThisCycle){
-        tail << "value: " << setprecision(3) << getMeasurement() << " " << unit;
+        tail << "value: " << setprecision(3) << value() << " " << m_unit;
         m_valueSetThisCycle = false;
     }
 
@@ -127,25 +111,8 @@ std::string Event<pT>::dumpString()
    Static member variables:
 */
 
-
+template<typename pT>
+uint Event<pT>::m_refCounter = 0;
 
 template<typename pT>
-const uint *Event<pT>::loopCycle;
-
-template<typename pT>
-std::vector<std::string> Event<pT>::outputTypes;
-
-template<typename pT>
-mat Event<pT>::observables;
-
-template<typename pT>
-uint Event<pT>::m_nCycles = 0;
-
-template<typename pT>
-uint Event<pT>::totalCounter = 0;
-
-template<typename pT>
-uint Event<pT>::toFileCounter = 0;
-
-template<typename pT>
-uint Event<pT>::priorityCounter = 0;
+uint Event<pT>::m_priorityCounter = 0;

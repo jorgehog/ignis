@@ -4,7 +4,6 @@
 
 #include <iomanip>
 
-
 using namespace ignis;
 
 
@@ -38,7 +37,6 @@ MainMesh<pT>::~MainMesh()
         delete intrinsicEvent;
     }
 
-    m_intrinsicEvents.clear();
 
     for (LoopChunk *lc : m_allLoopChunks)
     {
@@ -47,6 +45,12 @@ MainMesh<pT>::~MainMesh()
 
     m_allLoopChunks.clear();
 
+    m_allEvents.clear();
+
+    m_intrinsicEvents.clear();
+
+    m_storeEvents.clear();
+
 }
 
 template<typename pT>
@@ -54,7 +58,7 @@ void MainMesh<pT>::onConstruct()
 {
     setOutputPath("/tmp/");
 
-    assert(m_currentParticles != NULL);
+    BADAss(m_currentParticles, !=, NULL);
 
     for (uint i = 0; i < m_currentParticles->count(); ++i)
     {
@@ -100,11 +104,11 @@ void MainMesh<pT>::_dumpLoopChunkInfo()
         cout << "Loopchunk interval: [" << loopChunk->m_start << " " << loopChunk->m_end << "]" << endl;
         cout << "has " << loopChunk->m_executeEvents.size() << " events: " << endl;
         for (Event<pT>* event : loopChunk->m_executeEvents) {
-            cout << "  " << setw(2) << right << event->getPriority() << "  "
-                 << setw(30) << left << event->getType()
+            cout << "  " << setw(2) << right << event->priority() << "  "
+                 << setw(30) << left << event->type()
                  << "["
-                 << setw(5) << event->getOnsetTime() << " "
-                 << setw(5) << event->getOffsetTime()
+                 << setw(5) << event->onsetTime() << " "
+                 << setw(5) << event->offsetTime()
                  << "]"
                  << endl;
         }
@@ -113,30 +117,51 @@ void MainMesh<pT>::_dumpLoopChunkInfo()
 }
 
 template<typename pT>
-void MainMesh<pT>::storeEventValues() const
+void MainMesh<pT>::_streamValueToFile(const double value)
+{
+    (void) value;
+}
+
+template<typename pT>
+void MainMesh<pT>::_storeEventValues(const uint index)
 {
 
-    for (Event<pT>* event: m_currentChunk->m_executeEvents)
+    for (uint i = 0; i < numberOfStoredEvents(); ++i)
     {
-        event->storeEvent();
+        const double &value = m_storeEvents.at(i)->value();
+
+        if (m_storeEventMatrix)
+        {
+            observables(index, i) = value;
+        }
+
+        if (m_storeEventMatrixToFile)
+        {
+            this->_streamValueToFile(value);
+        }
+
     }
 
 }
 
 
 template<typename pT>
-void MainMesh<pT>::eventLoop()
+void MainMesh<pT>::setOutputVariables()
 {
+    for (Event<pT> *event : m_storeEvents)
+    {
+        outputTypes.push_back(event->type() + ("@" + event->meshField()->description()));
+    }
+}
+
+template<typename pT>
+void MainMesh<pT>::eventLoop(const uint nCycles)
+{
+    uint* loopCycle = new uint(0);
 
     _addIntrinsicEvents();
 
-    uint* loopCycle = new uint(0);
-
-    Event<pT>::setNumberOfCycles(nCycles);
-
-    Event<pT>::setLoopCyclePtr(loopCycle);
-
-    this->prepareEvents();
+    this->_prepareEvents(nCycles, loopCycle);
 
     _sortEvents();
 
@@ -175,6 +200,11 @@ template<typename pT>
 void MainMesh<pT>::_sendToTop(Event<pT> &event)
 {
     m_allEvents.push_back(&event);
+
+    if (event.storeValue())
+    {
+        m_storeEvents.push_back(&event);
+    }
 }
 
 template<typename pT>
@@ -195,7 +225,7 @@ void MainMesh<pT>::_addIntrinsicEvents()
         this->_addIntrinsicEvent(_stdout);
     }
 
-    if (m_storeEventMatrix && Event<pT>::getCounter() != 0)
+    if (m_storeEventMatrix)
     {
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();
@@ -209,7 +239,7 @@ void MainMesh<pT>::_sortEvents()
 {
     std::sort(m_allEvents.begin(),
               m_allEvents.end(),
-              [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->getPriority() < e2->getPriority();});
+              [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->priority() < e2->priority();});
 }
 
 
@@ -231,22 +261,21 @@ template<typename pT>
 void MainMesh<pT>::_setupChunks()
 {
 
-    uvec onsetTimes(Event<pT>::getTotalCounter());
-    uvec offsetTimes(Event<pT>::getTotalCounter());
+    uvec onsetTimes(Event<pT>::refCounter());
+    uvec offsetTimes(Event<pT>::refCounter());
 
     //    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
 
     uint k = 0;
-    for (Event<pT>* event : m_allEvents) {
-        onsetTimes(k) = event->getOnsetTime();
-        offsetTimes(k) = event->getOffsetTime();
+    for (Event<pT>* event : m_allEvents)
+    {
+        onsetTimes(k) = event->onsetTime();
+        offsetTimes(k) = event->offsetTime();
         k++;
     }
 
     onsetTimes = unique(onsetTimes);
     offsetTimes = unique(offsetTimes);
-
-
 
     uint start = onsetTimes(0);
     uint end;
@@ -308,7 +337,7 @@ void MainMesh<pT>::_setupChunks()
 
     for (Event<pT>* event : m_allEvents) {
         for (LoopChunk* loopChunk : m_allLoopChunks) {
-            if (event->getOnsetTime() <= loopChunk->m_start && event->getOffsetTime() >= loopChunk->m_end) {
+            if (event->onsetTime() <= loopChunk->m_start && event->offsetTime() >= loopChunk->m_end) {
 
                 if (event->_hasExecuteImpl()) {
                     loopChunk->m_executeEvents.push_back(event);
@@ -322,7 +351,7 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-    //    dumpLoopChunkInfo();
+    _dumpLoopChunkInfo();
 
 
 }
@@ -356,11 +385,6 @@ void MainMesh<pT>::dumpEvents() const
 
     cout << endl;
 }
-
-
-
-template<typename pT>
-uint MainMesh<pT>::nCycles = 0;
 
 template<typename pT>
 PositionHandler<pT> *MainMesh<pT>::m_currentParticles = NULL;

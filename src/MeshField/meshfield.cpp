@@ -82,22 +82,18 @@ void MeshField<pT>::resetSubFields()
 }
 
 template<typename pT>
-void MeshField<pT>::prepareEvents()
+void MeshField<pT>::_prepareEvents(const uint nCycles, const uint *loopCyclePtr)
 {
 
     for (Event<pT> *event : m_events)
     {
-        event->setPriority();
-
-        _sendToTop(*event);
-
-        event->setExplicitTimes();
+        _prepareEvent(event, nCycles, loopCyclePtr);
 
     }
 
     for (MeshField<pT>* subfield : m_subFields)
     {
-        subfield->prepareEvents();
+        subfield->_prepareEvents(nCycles, loopCyclePtr);
     }
 
 }
@@ -246,8 +242,6 @@ void MeshField<pT>::addEvent(Event<pT> &event)
 
     event.setMeshField(this);
 
-    event.setOutputVariables();
-
     m_events.push_back(&event);
 
     event.setAddress(m_events.size()-1);
@@ -318,4 +312,18 @@ void MeshField<pT>::scaleField(const Col<pT> & oldShape, const topmat &oldTopolo
 
     setTopology(newSubTopology);
 
+}
+
+template<typename pT>
+void MeshField<pT>::_prepareEvent(Event<pT> *event, const uint nCycles, const uint *loopCyclePtr)
+{
+    event->_setPriority();
+
+    event->_setNumberOfCycles(nCycles);
+
+    event->_setExplicitTimes();
+
+    event->_setLoopCyclePtrePtr(loopCyclePtr);
+
+    _sendToTop(*event);
 }

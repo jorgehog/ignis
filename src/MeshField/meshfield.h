@@ -5,8 +5,10 @@
 #include <string>
 #include <vector>
 
-
 #include <armadillo>
+
+#include "BADAss/badass.h"
+
 
 using namespace arma;
 
@@ -147,12 +149,14 @@ protected:
     std::vector<MeshField<pT>* > m_subFields;
 
 
+    void _prepareEvent(Event<pT> *event, const uint nCycles, const uint *loopCyclePtr);
+
     virtual void _sendToTop(Event<pT> & event);
 
 
     //This should be executed from the MainMesh,
     //As it recursively calls all subfields.
-    void prepareEvents();
+    void _prepareEvents(const uint nCycles, const uint *loopCyclePtr);
 
     bool append(uint i);
 
