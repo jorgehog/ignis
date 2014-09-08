@@ -9,15 +9,6 @@
 using namespace ignis;
 using namespace std;
 
-double factorial(int N)
-{
-    if (N == 0)
-    {
-        return 1;
-    }
-
-    return N*factorial(N - 1);
-}
 
 TEST(setAndGet)
 {
@@ -56,7 +47,9 @@ TEST(saveAndLoad)
     Mesh mesh = {10, 10 , 10};
 
     mesh.enableOutput(false);
-    mesh.enableEventValueStorage(true, true, "test.arma");
+
+    string filename = "ignis_test.ign";
+    mesh.enableEventValueStorage(true, true, filename);
 
     uint K = 10;
     vector<SaveData*> saveDataEvents(K);
@@ -69,14 +62,12 @@ TEST(saveAndLoad)
 
     }
 
-    string path = mesh.outputPath() + "test.arma";
-
-    loadMatrix.save(path);
+    string path = mesh.outputPath() + filename;
 
     uint nCycles = 5;
     mesh.eventLoop(nCycles);
 
-    loadMatrix.load(path);
+    ignis::loadArmaFromIgn(loadMatrix, path);
 
     cout << loadMatrix << endl;
 

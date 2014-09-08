@@ -91,7 +91,7 @@ std::string Event<pT>::dumpString()
 
     s << left
       << "<" << setw(20) << m_type << " "
-      << "@" << setw(30) << m_meshField->m_description;
+      << "@" << setw(30) << m_meshField->description();
 
     if (m_valueSetThisCycle){
         tail << "value: " << setprecision(3) << value() << " " << m_unit;

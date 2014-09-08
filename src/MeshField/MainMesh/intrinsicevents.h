@@ -52,7 +52,7 @@ public:
 
     void initialize()
     {
-        m_mm->_initializeEventMatrix(this->m_nCycles/m_mm->saveValuesSpacing());
+        m_mm->_initializeEventStorage(this->m_nCycles/m_mm->saveValuesSpacing());
     }
 
     void execute()

@@ -32,25 +32,6 @@ template<typename pT>
 MainMesh<pT>::~MainMesh()
 {
 
-    for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
-    {
-        delete intrinsicEvent;
-    }
-
-
-    for (LoopChunk *lc : m_allLoopChunks)
-    {
-        delete lc;
-    }
-
-    m_allLoopChunks.clear();
-
-    m_allEvents.clear();
-
-    m_intrinsicEvents.clear();
-
-    m_storeEvents.clear();
-
 }
 
 template<typename pT>
@@ -94,6 +75,36 @@ void MainMesh<pT>::_updateContainments()
 }
 
 template<typename pT>
+void MainMesh<pT>::_finalize()
+{
+    for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
+    {
+        delete intrinsicEvent;
+    }
+
+    m_intrinsicEvents.clear();
+
+
+    for (LoopChunk *lc : m_allLoopChunks)
+    {
+        delete lc;
+    }
+
+    m_allLoopChunks.clear();
+
+    m_allEvents.clear();
+
+
+    m_storageEnabledEvents.clear();
+
+    if (m_eventStorageFile.is_open())
+    {
+        m_eventStorageFile.close();
+    }
+
+}
+
+template<typename pT>
 void MainMesh<pT>::_dumpLoopChunkInfo()
 {
 
@@ -119,8 +130,9 @@ void MainMesh<pT>::_dumpLoopChunkInfo()
 template<typename pT>
 void MainMesh<pT>::_streamValueToFile(const double value)
 {
-    (void) value;
-    observables.save(m_outputPath + m_filename);
+    BADAssBool(m_eventStorageFile.is_open(), "event file is not open but asked to write.");
+
+    m_eventStorageFile.write(reinterpret_cast<const char*>(&value), sizeof(double));
 }
 
 template<typename pT>
@@ -129,14 +141,14 @@ void MainMesh<pT>::_storeEventValues(const uint index)
 
     for (uint i = 0; i < numberOfStoredEvents(); ++i)
     {
-        const double &value = m_storeEvents.at(i)->value();
+        const double &value = m_storageEnabledEvents.at(i)->value();
 
-        if (m_storeEventMatrix)
+        if (m_storeEvents)
         {
-            observables(index, i) = value;
+            m_storedEventValues(index, i) = value;
         }
 
-        if (m_storeEventMatrixToFile)
+        if (m_storeEventsToFile)
         {
             this->_streamValueToFile(value);
         }
@@ -147,11 +159,28 @@ void MainMesh<pT>::_storeEventValues(const uint index)
 
 
 template<typename pT>
-void MainMesh<pT>::setOutputVariables()
+void MainMesh<pT>::_initializeEventStorage(const uint size)
 {
-    for (Event<pT> *event : m_storeEvents)
+
+    for (Event<pT> *event : m_storageEnabledEvents)
     {
-        outputTypes.push_back(event->type() + ("@" + event->meshField()->description()));
+        m_storedEventTypes.push_back(event->type() + ("@" + event->meshField().description()));
+    }
+
+    if (m_storeEvents)
+    {
+        m_storedEventValues.zeros(size, numberOfStoredEvents());
+    }
+
+    if (m_storeEventsToFile)
+    {
+        m_eventStorageFile.open(m_outputPath + m_filename, std::ios::binary);
+
+        uint nCols = m_storageEnabledEvents.size();
+
+        m_eventStorageFile.write(reinterpret_cast<const char*>(&size), sizeof(uint));
+        m_eventStorageFile.write(reinterpret_cast<const char*>(&nCols), sizeof(uint));
+
     }
 }
 
@@ -185,6 +214,8 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
     delete loopCycle;
 
+    _finalize();
+
 }
 
 template<typename pT>
@@ -204,7 +235,7 @@ void MainMesh<pT>::_sendToTop(Event<pT> &event)
 
     if (event.storeValue())
     {
-        m_storeEvents.push_back(&event);
+        m_storageEnabledEvents.push_back(&event);
     }
 }
 
@@ -226,7 +257,7 @@ void MainMesh<pT>::_addIntrinsicEvents()
         this->_addIntrinsicEvent(_stdout);
     }
 
-    if (m_storeEventMatrix)
+    if (m_storeEvents)
     {
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();

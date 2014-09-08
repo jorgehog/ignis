@@ -34,26 +34,23 @@ public:
     typedef typename Mat<pT>::template fixed<IGNIS_DIM, 2> topmat;
     typedef typename Col<pT>::template fixed<IGNIS_DIM>    shapevec;
 
-    MeshField(const std::string m_description);
+    MeshField(const std::string description);
 
-    MeshField(const topmat & m_topology, const std::string m_description = "meshField");
+    MeshField(const topmat & topology, const std::string description = "meshField");
 
-    MeshField(const std::initializer_list<pT> m_topology, const std::string m_description);
+    MeshField(const std::initializer_list<pT> topology, const std::string description);
 
     virtual ~MeshField();
 
-    const pT m_volume;
+    const pT volume;
 
-    const topmat m_topology;
+    const topmat topology;
 
-    const shapevec m_shape;
+    const shapevec shape;
 
-    void setTopology(const topmat &m_topology, bool recursive=true);
+    void setTopology(const topmat &topology, bool recursive=true);
 
-    void setTopology(const std::initializer_list<pT> m_topology, bool recursive=true);
-
-
-    const std::string m_description;
+    void setTopology(const std::initializer_list<pT> topology, bool recursive=true);
 
 
     virtual bool isMainMesh () const
@@ -101,6 +98,11 @@ public:
     void scaleField(const Col<pT> &oldShape, const topmat &oldTopology, const topmat &newTopology);
 
 
+    const string description() const
+    {
+        return m_description;
+    }
+
     virtual uint getPopulation() const
     {
         return m_atoms.size();
@@ -131,6 +133,8 @@ public:
     friend class MainMesh<pT>;
 
 protected:
+
+    const std::string m_description;
 
     PositionHandler<pT> *m_particles;
 

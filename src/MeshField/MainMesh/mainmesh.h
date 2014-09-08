@@ -3,6 +3,8 @@
 
 #include "../meshfield.h"
 
+#include <fstream>
+
 namespace ignis
 {
 
@@ -14,9 +16,9 @@ public:
 
     MainMesh();
 
-    MainMesh(const Mat<pT> &m_topology);
+    MainMesh(const Mat<pT> &topology);
 
-    MainMesh(const std::initializer_list<pT> m_topology);
+    MainMesh(const std::initializer_list<pT> topology);
 
     virtual ~MainMesh();
 
@@ -78,15 +80,15 @@ public:
         return m_outputSpacing;
     }
 
-    void enableEventValueStorage(const bool storeInMatrix,
+    void enableEventValueStorage(const bool store,
                                  const bool saveToFile,
                                  const std::string name = "ignisEventsOut.arma",
                                  const std::string path = "/tmp",
                                  const uint saveValuesSpacing = 1)
     {
-        m_storeEventMatrix = storeInMatrix;
+        m_storeEvents = store;
 
-        m_storeEventMatrixToFile = saveToFile;
+        m_storeEventsToFile = saveToFile;
 
         m_filename = name;
 
@@ -103,47 +105,41 @@ public:
 
     uint numberOfStoredEvents() const
     {
-        return m_storeEvents.size();
+        return m_storageEnabledEvents.size();
     }
 
-    void _initializeEventMatrix(const uint size)
-    {
-        observables.zeros(size, numberOfStoredEvents());
-    }
 
+    void _initializeEventStorage(const uint size);
 
     void _storeEventValues(const uint index);
 
 
 private:
 
-    mat observables;
+    mat m_storedEventValues;
 
-    std::vector<std::string> outputTypes;
+    std::vector<std::string> m_storedEventTypes;
 
-    uint toFileCounter;
+    std::ofstream m_eventStorageFile;
 
     const std::vector<std::string> &outputEventDescriptions()
     {
-        return outputTypes;
+        return m_storedEventTypes;
     }
 
-    const mat &eventMatrix()
+    const mat &storedEventValues()
     {
-        return observables;
+        return m_storedEventValues;
     }
 
 
-    void dumpEventMatrixData(uint k)
+    void dumpStoredEvent(uint k)
     {
         for (uint i = 0; i < numberOfStoredEvents(); ++i)
         {
-            cout << std::setw(30) << std::left << outputTypes.at(i) << "  " << std::setw(10) << observables(k, i) << endl;
+            cout << std::setw(30) << std::left << m_storedEventTypes.at(i) << "  " << std::setw(10) << m_storedEventValues(k, i) << endl;
         }
     }
-
-
-    void setOutputVariables();
 
 
 
@@ -156,7 +152,7 @@ private:
 
     std::vector<Event<pT> *> m_intrinsicEvents;
 
-    std::vector<Event<pT> *> m_storeEvents;
+    std::vector<Event<pT> *> m_storageEnabledEvents;
 
 
     void _dumpLoopChunkInfo();
@@ -164,8 +160,8 @@ private:
     bool m_doOutput;
     uint m_outputSpacing;
 
-    bool m_storeEventMatrix;
-    bool m_storeEventMatrixToFile;
+    bool m_storeEvents;
+    bool m_storeEventsToFile;
 
     uint m_saveValuesSpacing;
     std::string m_filename;
@@ -214,6 +210,8 @@ private:
         this->addEvent(event);
         m_intrinsicEvents.push_back(event);
     }
+
+    void _finalize();
 
 
 };

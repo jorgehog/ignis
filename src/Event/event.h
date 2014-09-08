@@ -57,6 +57,11 @@ public:
         return m_nCycles;
     }
 
+    const MeshField<pT> &meshField() const
+    {
+        return *m_meshField;
+    }
+
 
     void _setPriority();
 

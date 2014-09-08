@@ -6,7 +6,7 @@ using namespace ignis;
 
 template<typename pT>
 MeshField<pT>::MeshField(const std::string description) :
-    m_volume(0),
+    volume(0),
     m_description(description),
     m_particles(MainMesh<pT>::currentParticles())
 {
@@ -16,7 +16,7 @@ MeshField<pT>::MeshField(const std::string description) :
 
 template<typename pT>
 MeshField<pT>::MeshField(const topmat &topology, const std::string description) :
-    m_volume(0),
+    volume(0),
     m_description(description),
     m_particles(MainMesh<pT>::currentParticles())
 {
@@ -25,7 +25,7 @@ MeshField<pT>::MeshField(const topmat &topology, const std::string description) 
 
 template<typename pT>
 MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::string description) :
-    m_volume(0),
+    volume(0),
     m_description(description),
     m_particles(MainMesh<pT>::currentParticles())
 {
@@ -46,9 +46,9 @@ template<typename pT>
 bool MeshField<pT>::isWithinThis(uint i) {
 
     for (uint j = 0; j < IGNIS_DIM; ++j) {
-        if (particles(i, j) < m_topology(j, 0)){
+        if (particles(i, j) < topology(j, 0)){
             return false;
-        } else if (particles(i, j) > m_topology(j, 1)) {
+        } else if (particles(i, j) > topology(j, 1)) {
             return false;
         }
     }
@@ -154,8 +154,8 @@ bool MeshField<pT>::notCompatible(MeshField<pT> &subField)
 
     if (&subField == this) return true;
 
-    const topmat & sft = subField.m_topology;
-    const topmat & tft = this->m_topology;
+    const topmat & sft = subField.topology;
+    const topmat & tft = this->topology;
 
 #if IGNIS_DIM == 2
     bool outsideMesh =  (sft(0, 0) < tft(0, 0)) ||
@@ -199,27 +199,27 @@ void MeshField<pT>::setTopology(const topmat &topology, bool recursive)
 
     if (recursive) {
         for (MeshField<pT> * subField : m_subFields) {
-            subField->scaleField(m_shape, this->m_topology, topology);
+            subField->scaleField(shape, this->topology, topology);
         }
     }
 
     //Evil haxx for changing const values
 
     topmat * matPtr;
-    matPtr = (topmat*)(&this->m_topology);
+    matPtr = (topmat*)(&this->topology);
     *matPtr = topology;
 
     shapevec * vecPtr;
-    vecPtr = (shapevec*)(&m_shape);
+    vecPtr = (shapevec*)(&shape);
     *vecPtr = topology.col(1) - topology.col(0);
 
     //Calculate the volume
     pT *new_volume;
-    new_volume = (pT*)(&m_volume);
+    new_volume = (pT*)(&volume);
 
     *new_volume = 1;
     for (uint i = 0; i < IGNIS_DIM; ++i) {
-        *new_volume *= m_shape(i);
+        *new_volume *= shape(i);
     }
 
 }
@@ -258,9 +258,9 @@ void MeshField<pT>::addSubField(MeshField<pT>  & subField)
         std::stringstream s;
 
         s << "subfield " << subField.m_description << " not compatible on " << m_description << std::endl;
-        s << "CONFLICT:\nsubField\n" << subField.m_topology << " is out of bounds, similar to parent or inverted/empty\n" << m_topology << std::endl;
+        s << "CONFLICT:\nsubField\n" << subField.topology << " is out of bounds, similar to parent or inverted/empty\n" << topology << std::endl;
 
-        Mat<pT> issue = (-m_topology + subField.m_topology);
+        Mat<pT> issue = (-topology + subField.topology);
         issue.col(1)*=-1;
 
         s << "Issue at negative or non-zero region:\n" << issue << std::endl;
@@ -279,7 +279,7 @@ template<typename pT>
 void MeshField<pT>::stretchField(double deltaL, uint xyz)
 {
 
-    Mat<pT> newTopology = m_topology;
+    Mat<pT> newTopology = topology;
     newTopology(xyz, 0) += deltaL/2;
     newTopology(xyz, 1) -= deltaL/2;
 
@@ -299,9 +299,9 @@ void MeshField<pT>::scaleField(const Col<pT> & oldShape, const topmat &oldTopolo
         newShape_i = newTopology(i, 1) - newTopology(i, 0);
         shapeFac = newShape_i/oldShape(i);
 
-        newSubShape_i = shapeFac*m_shape(i);
+        newSubShape_i = shapeFac*shape(i);
 
-        oldCOM = m_topology(i, 1) - m_shape(i)/2 - oldTopology(i, 0);
+        oldCOM = topology(i, 1) - shape(i)/2 - oldTopology(i, 0);
 
         newCOM = shapeFac*oldCOM;
 
