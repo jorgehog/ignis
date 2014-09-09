@@ -7,7 +7,7 @@
 
 #include <armadillo>
 
-#include "BADAss/badass.h"
+#include <BADAss/badass.h>
 
 
 using namespace arma;
