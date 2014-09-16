@@ -26,12 +26,6 @@ public:
 
     virtual ~Event();
 
-    void _executeEvent()
-    {
-        execute();
-        m_cycle++;
-    }
-
     const bool &initialized() const
     {
         return m_initialized;
@@ -42,10 +36,11 @@ public:
         m_initialized = true;
     }
 
+    virtual void execute() = 0;
+
     virtual void initialize(){}
 
     virtual void reset(){}
-
 
     uint meshAddress() const
     {
@@ -200,6 +195,11 @@ public:
         return true;
     }
 
+    void _iterateCycle()
+    {
+        m_cycle++;
+    }
+
 
 
 protected:
@@ -235,10 +235,6 @@ protected:
 
 
     MeshField<pT> *m_meshField;
-
-
-
-    virtual void execute() = 0;
 
     uint m_cycle;
 

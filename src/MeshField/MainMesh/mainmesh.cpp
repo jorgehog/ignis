@@ -37,6 +37,14 @@ MainMesh<pT>::~MainMesh()
 template<typename pT>
 void MainMesh<pT>::onConstruct()
 {
+    m_doOutput = false;
+
+    m_storeEvents = false;
+
+    m_storeEventsToFile = false;
+
+    m_reportProgress = false;
+
     setOutputPath("/tmp/");
 
     BADAss(m_currentParticles, !=, NULL);
@@ -391,13 +399,18 @@ template<typename pT>
 void MainMesh<pT>::_executeEvents()
 {
 
-    for (Event<pT> * event : m_currentChunk->m_executeEvents) {
-        event->_executeEvent();
+    for (Event<pT> * event : m_currentChunk->m_executeEvents)
+    {
+        event->execute();
     }
 
-    for (Event<pT> * event : m_currentChunk->m_resetEvents) {
+    for (Event<pT> * event : m_currentChunk->m_resetEvents)
+    {
         event->reset();
+        event->_iterateCycle();
     }
+
+
 
 }
 
