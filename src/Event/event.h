@@ -97,7 +97,7 @@ public:
         return m_storeValue;
     }
 
-    bool notSilent() const
+    bool hasOutput() const
     {
         return m_hasOutput;
     }
@@ -245,9 +245,9 @@ protected:
     bool m_initialized;
 
 
-    uint m_onsetTime = IGNIS_UNSET_UINT;
+    uint m_onsetTime;
 
-    uint m_offsetTime = IGNIS_UNSET_UINT;
+    uint m_offsetTime;
 
 
     const pT registeredHandler(const uint n, const uint d) const

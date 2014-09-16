@@ -105,7 +105,7 @@ void MainMesh<pT>::_finalize()
 }
 
 template<typename pT>
-void MainMesh<pT>::_dumpLoopChunkInfo()
+void MainMesh<pT>::dumpLoopChunkInfo()
 {
 
     using namespace std;
@@ -293,10 +293,8 @@ template<typename pT>
 void MainMesh<pT>::_setupChunks()
 {
 
-    uvec onsetTimes(Event<pT>::refCounter());
-    uvec offsetTimes(Event<pT>::refCounter());
-
-    //    assert(Event<pT>::getTotalCounter() == allEvents.size() && "Mismatch in event sizes...");
+    uvec onsetTimes(m_allEvents.size());
+    uvec offsetTimes(m_allEvents.size());
 
     uint k = 0;
     for (Event<pT>* event : m_allEvents)
@@ -383,7 +381,7 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-//    _dumpLoopChunkInfo();
+//    dumpLoopChunkInfo();
 
 
 }
@@ -407,15 +405,21 @@ template<typename pT>
 void MainMesh<pT>::dumpEvents() const
 {
 
+    bool endline = false;
     for (Event<pT>* event : m_currentChunk->m_executeEvents)
     {
-        if (event->notSilent())
+        if (event->hasOutput())
         {
             cout << event->dumpString() << endl;
+            endline = true;
         }
     }
 
-    cout << endl;
+    if (endline)
+    {
+        cout << endl;
+    }
+
 }
 
 template<typename pT>

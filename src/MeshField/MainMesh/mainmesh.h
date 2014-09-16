@@ -133,6 +133,8 @@ public:
 
     void _storeEventValues(const uint index);
 
+    void dumpLoopChunkInfo();
+
 
 private:
 
@@ -151,9 +153,6 @@ private:
     std::vector<Event<pT> *> m_intrinsicEvents;
 
     std::vector<Event<pT> *> m_storageEnabledEvents;
-
-
-    void _dumpLoopChunkInfo();
 
     bool m_doOutput;
     uint m_outputSpacing;

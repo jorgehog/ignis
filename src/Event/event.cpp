@@ -15,6 +15,8 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     m_unit(unit),
     m_cycle(0),
     m_initialized(false),
+    m_onsetTime(IGNIS_UNSET_UINT),
+    m_offsetTime(IGNIS_UNSET_UINT),
     m_registeredHandler(MainMesh<pT>::currentParticles())
 {
     m_refCounter++;
