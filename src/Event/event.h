@@ -8,8 +8,12 @@
 #include <iostream>
 #include <iomanip>
 
+#include <map>
+
 #include "BADAss/badass.h"
 
+using std::string;
+using std::map;
 
 namespace ignis
 {
@@ -22,7 +26,7 @@ class Event
 {
 public:
 
-    Event(std::string type = "Event", std::string m_unit = "", bool m_hasOutput=false, bool m_storeValue=false);
+    Event(string type = "Event", string m_unit = "", bool m_hasOutput=false, bool m_storeValue=false);
 
     virtual ~Event();
 
@@ -82,9 +86,33 @@ public:
         return m_refCounter;
     }
 
-    const std::string type() const
+    const string type() const
     {
         return m_type;
+    }
+
+    void setDependency(const Event<pT> *event)
+    {
+        m_dependancies[event->type()] = event;
+    }
+
+    const map<const string, const Event<pT> *> &dependencies() const
+    {
+        return m_dependancies;
+    }
+
+    const Event<pT> *dependency(const string dependencyType) const
+    {
+        const auto &loot = m_dependancies.find(dependencyType);
+
+        BADAss(loot, !=, m_dependancies.end(), "Dependency not found.", [&] ()
+        {
+            BADAssSimpleDump(m_type, dependencyType);
+        });
+
+        return loot->second;
+
+
     }
 
     const bool &storeValue() const
@@ -97,7 +125,7 @@ public:
         return m_hasOutput;
     }
 
-    std::string unit() const
+    string unit() const
     {
         return m_unit;
     }
@@ -156,7 +184,9 @@ public:
 
     void _setExplicitTimes();
 
-    std::string dumpString();
+    string dumpString();
+
+    string description() const;
 
     void setOnsetTime(uint onsetTime)
     {
@@ -221,7 +251,7 @@ protected:
     uint m_meshAddress; //! This event's index in meshfield's event array
 
 
-    const std::string m_type;
+    const string m_type;
 
     double* m_value;
 
@@ -231,7 +261,7 @@ protected:
 
     const bool m_storeValue;
 
-    const std::string m_unit;
+    const string m_unit;
 
 
     MeshField<pT> *m_meshField;
@@ -269,6 +299,8 @@ protected:
 private:
 
     PositionHandler<pT> *m_registeredHandler;
+
+    map<const string, const Event<pT> *> m_dependancies;
 
 };
 

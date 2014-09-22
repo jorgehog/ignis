@@ -13,6 +13,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     m_hasOutput(doOutput),
     m_storeValue(toFile),
     m_unit(unit),
+    m_meshField(NULL),
     m_cycle(0),
     m_initialized(false),
     m_onsetTime(IGNIS_UNSET_UINT),
@@ -105,6 +106,28 @@ std::string Event<pT>::dumpString()
 
     s << right << tail.str();
 
+
+    return s.str();
+}
+
+template<typename pT>
+std::string Event<pT>::description() const
+{
+    using namespace std;
+
+    stringstream s;
+    string meshName;
+
+    if (m_meshField == NULL)
+    {
+        meshName = "[no mesh]";
+    }
+    else
+    {
+        meshName = m_meshField->description();
+    }
+
+    s << m_type << " @" << meshName;
 
     return s.str();
 }

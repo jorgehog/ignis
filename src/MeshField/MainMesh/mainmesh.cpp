@@ -280,6 +280,27 @@ void MainMesh<pT>::_sortEvents()
     std::sort(m_allEvents.begin(),
               m_allEvents.end(),
               [] (const Event<pT> *e1, const Event<pT> *e2) {return e1->priority() < e2->priority();});
+
+    for (Event<pT> *event : m_allEvents)
+    {
+        for (const auto &dependency_pair: event->dependencies())
+        {
+            const Event<pT> *dependency = dependency_pair.second;
+
+            if (dependency->priority() > event->priority())
+            {
+                std::stringstream s;
+                s << "Dependency error: "
+                  << event->description()
+                  << " (" << event->priority() << ")"
+                  << " depends on "
+                  << dependency->description()
+                  << " (" << dependency->priority() << ")";
+
+                throw std::logic_error(s.str());
+            }
+        }
+    }
 }
 
 
