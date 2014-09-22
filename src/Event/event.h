@@ -96,6 +96,11 @@ public:
         m_dependancies[event->type()] = event;
     }
 
+    void setDependency(const Event<pT> &event)
+    {
+        setDependency(&event);
+    }
+
     const map<const string, const Event<pT> *> &dependencies() const
     {
         return m_dependancies;
