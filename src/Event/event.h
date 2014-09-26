@@ -140,9 +140,24 @@ public:
         return m_onsetTime;
     }
 
+    const bool &hasStarted() const
+    {
+        return m_initialized;
+    }
+
     const uint &offsetTime() const
     {
         return m_offsetTime;
+    }
+
+    bool hasEnded() const
+    {
+        return m_cycle > m_eventLength;
+    }
+
+    bool isActive() const
+    {
+        return !hasEnded();
     }
 
     const uint &eventLength() const
