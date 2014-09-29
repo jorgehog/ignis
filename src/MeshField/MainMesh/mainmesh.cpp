@@ -382,7 +382,7 @@ void MainMesh<pT>::_setupChunks()
             }
         }
 
-        if (start < end)
+        if (start <= end && (i != onsetTimes.n_elem - 1))
         {
             //            if (debug) cout << "adding remaining interval " << start << " - " << end << endl;
             m_allLoopChunks.push_back(new LoopChunk(start, end));
@@ -410,8 +410,9 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-//    dumpLoopChunkInfo();
-
+#ifndef NDEBUG
+    dumpLoopChunkInfo();
+#endif
 
 }
 
