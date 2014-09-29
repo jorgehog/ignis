@@ -428,10 +428,12 @@ void MainMesh<pT>::_executeEvents()
     for (Event<pT> * event : m_currentChunk->m_resetEvents)
     {
         event->reset();
-        event->_iterateCycle();
     }
 
-
+    for (Event<pT> * event : m_currentChunk->m_resetEvents)
+    {
+        event->_iterateCycle();
+    }
 
 }
 

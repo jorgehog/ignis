@@ -140,9 +140,22 @@ public:
         return m_onsetTime;
     }
 
-    const bool &hasStarted() const
+    uint loopCycle() const
     {
-        return m_initialized;
+        if (m_loopCycle == NULL)
+        {
+            return 0;
+        }
+
+        else
+        {
+            return *m_loopCycle;
+        }
+    }
+
+    bool hasStarted() const
+    {
+        return loopCycle() >= m_onsetTime;
     }
 
     const uint &offsetTime() const
