@@ -118,6 +118,12 @@ void MeshField<pT>::_sendToTop(Event<pT> &event)
 }
 
 template<typename pT>
+void MeshField<pT>::terminateLoop(std::string terminateMessage, std::string terminator)
+{
+    m_parent->terminateLoop(terminateMessage, terminator);
+}
+
+template<typename pT>
 bool MeshField<pT>::checkSubFields(uint i)
 {
 

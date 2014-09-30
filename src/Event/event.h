@@ -106,7 +106,8 @@ public:
         return m_dependancies;
     }
 
-    const Event<pT> *dependency(const string dependencyType) const
+    template<typename T>
+    const T *dependency(const string dependencyType) const
     {
         const auto &loot = m_dependancies.find(dependencyType);
 
@@ -115,9 +116,12 @@ public:
             BADAssSimpleDump(m_type, dependencyType);
         });
 
-        return loot->second;
+        return static_cast<const T*>(loot->second);
+    }
 
-
+    const Event<pT> *dependency(const string dependencyType) const
+    {
+        return dependency<const Event<pT> >(dependencyType);
     }
 
     const bool &storeValue() const
@@ -326,6 +330,11 @@ protected:
     uint totalNumberOfParticles() const
     {
         return m_registeredHandler->count();
+    }
+
+    void terminateLoop(std::string terminateMessage = "")
+    {
+        m_meshField->terminateLoop(terminateMessage, description());
     }
 
 private:

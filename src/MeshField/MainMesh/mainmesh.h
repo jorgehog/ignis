@@ -135,6 +135,28 @@ public:
 
     void dumpLoopChunkInfo();
 
+    void terminateLoop(std::string terminateMessage = "", std::string terminator = "Unknown")
+    {
+        m_terminate = true;
+        m_terminateMessage = terminateMessage;
+        m_terminator = terminator;
+    }
+
+    void terminateMessage(const uint cycle, const uint nCycles)
+    {
+        cout << "ignis::eventLoop terminated by "
+             << m_terminator
+             << " at cycle "
+             << cycle << " / " << nCycles;
+
+        if (!m_terminateMessage.empty())
+        {
+            cout << ". What: " << m_terminateMessage;
+        }
+
+        cout << endl;
+    }
+
 
 private:
 
@@ -164,6 +186,10 @@ private:
     std::string m_filename;
 
     bool m_reportProgress;
+
+    bool m_terminate;
+    std::string m_terminateMessage;
+    std::string m_terminator;
 
     struct LoopChunk
     {

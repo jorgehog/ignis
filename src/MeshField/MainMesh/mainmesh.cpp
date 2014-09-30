@@ -85,6 +85,7 @@ void MainMesh<pT>::_updateContainments()
 template<typename pT>
 void MainMesh<pT>::_finalize()
 {
+
     for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
     {
         delete intrinsicEvent;
@@ -205,9 +206,7 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
     _setupChunks();
 
-#ifndef NDEBUG
-    dumpLoopChunkInfo();
-#endif
+    m_terminate = false;
 
     for (LoopChunk* loopChunk : m_allLoopChunks) {
 
@@ -220,8 +219,19 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
             _updateContainments();
 
             _executeEvents();
+
+            if (m_terminate)
+            {
+                break;
+            }
         }
 
+        if (m_terminate)
+        {
+            terminateMessage(*loopCycle, nCycles);
+
+            break;
+        }
     }
 
     delete loopCycle;

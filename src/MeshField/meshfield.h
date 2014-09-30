@@ -130,6 +130,9 @@ public:
         return m_particles->count();
     }
 
+    virtual void terminateLoop(std::string terminateMessage = "", std::string terminator = "Unknown");
+
+
     friend class MainMesh<pT>;
 
 protected:
