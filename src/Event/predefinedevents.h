@@ -209,15 +209,17 @@ public:
 
     SaveToFile(std::string path, uint freq) : Event<pT>("SaveData"), path(path), freq(freq) {}
 
-    void execute() {
-        if ((*Event<pT>::m_loopCycle % freq) == 0) {
+    void execute()
+    {
+        if ((Event<pT>::loopCycle() % freq) == 0)
+        {
 
             scaledPos = Event<pT>::registeredHandler();
             scaledPos.col(0)/=Event<pT>::m_meshField->shape(0);
             scaledPos.col(1)/=Event<pT>::m_meshField->shape(1);
 
             std::stringstream s;
-            s << path << "/ignisPos" << *Event<pT>::m_loopCycle << ".arma";
+            s << path << "/ignisPos" << Event<pT>::loopCycle() << ".arma";
             scaledPos.save(s.str());
         }
     }

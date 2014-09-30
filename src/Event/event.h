@@ -140,9 +140,9 @@ public:
         return m_onsetTime;
     }
 
-    const bool &hasStarted() const
+    bool hasStarted() const
     {
-        return m_initialized;
+        return loopCycle() >= m_onsetTime;
     }
 
     const uint &offsetTime() const
@@ -170,6 +170,18 @@ public:
         return *m_value;
     }
 
+    uint loopCycle() const
+    {
+        if (m_loopCycle == NULL)
+        {
+            return 0;
+        }
+
+        else
+        {
+            return *m_loopCycle;
+        }
+    }
 
     void setValue(double value)
     {
@@ -192,7 +204,7 @@ public:
         m_nCycles = nCycles;
     }
 
-    void _setLoopCyclePtrePtr(const uint* loopCycle)
+    void _setLoopCyclePtr(const uint* loopCycle)
     {
         m_loopCycle = loopCycle;
     }

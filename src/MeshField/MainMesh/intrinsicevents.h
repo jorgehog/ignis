@@ -12,13 +12,13 @@ class _reportProgress : public Event<pT>
 {
 public:
 
-    using Event<pT>::m_loopCycle;
+    using Event<pT>::loopCycle;
     using Event<pT>::m_nCycles;
 
     _reportProgress() : Event<pT>("Progress", "%", true) {}
 
     void execute() {
-        this->setValue(*m_loopCycle*100.0/m_nCycles);
+        this->setValue(loopCycle()*100.0/m_nCycles);
     }
 };
 
@@ -57,9 +57,9 @@ public:
 
     void execute()
     {
-        if ((*this->m_loopCycle)%m_mm->saveValuesSpacing() == 0)
+        if (this->loopCycle()%m_mm->saveValuesSpacing() == 0)
         {
-            m_mm->_storeEventValues(*this->m_loopCycle/m_mm->saveValuesSpacing());
+            m_mm->_storeEventValues(this->loopCycle()/m_mm->saveValuesSpacing());
         }
 
     }

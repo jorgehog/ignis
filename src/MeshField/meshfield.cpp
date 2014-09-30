@@ -88,7 +88,6 @@ void MeshField<pT>::_prepareEvents(const uint nCycles, const uint *loopCyclePtr)
     for (Event<pT> *event : m_events)
     {
         _prepareEvent(event, nCycles, loopCyclePtr);
-
     }
 
     for (MeshField<pT>* subfield : m_subFields)
@@ -323,7 +322,7 @@ void MeshField<pT>::_prepareEvent(Event<pT> *event, const uint nCycles, const ui
 
     event->_setExplicitTimes();
 
-    event->_setLoopCyclePtrePtr(loopCyclePtr);
+    event->_setLoopCyclePtr(loopCyclePtr);
 
     _sendToTop(*event);
 }

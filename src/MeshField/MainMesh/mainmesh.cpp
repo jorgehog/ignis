@@ -205,6 +205,10 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
     _setupChunks();
 
+#ifndef NDEBUG
+    dumpLoopChunkInfo();
+#endif
+
     for (LoopChunk* loopChunk : m_allLoopChunks) {
 
         m_currentChunk = loopChunk;
@@ -336,13 +340,21 @@ void MainMesh<pT>::_setupChunks()
     onsetTimes = unique(onsetTimes);
     offsetTimes = unique(offsetTimes);
 
+
+
     uint start = onsetTimes(0);
     uint end;
 
     uint jStart = 0;
     uint offsetTime;
 
-    //    bool debug = false;
+    bool debug = false;
+
+    if (debug)
+    {
+        cout << onsetTimes << endl;
+        cout << offsetTimes << endl;
+    }
 
     for (uint i = 0; i < onsetTimes.n_elem; ++i) {
 
@@ -356,21 +368,21 @@ void MainMesh<pT>::_setupChunks()
             end = offsetTimes(offsetTimes.n_elem - 1) + 1;
         }
 
-        //        if (debug) cout << "start at " << start << endl;
-        //        if (debug) cout << "end " << end << endl;
+        if (debug) cout << "start at " << start << endl;
+        if (debug) cout << "end " << end << endl;
 
         for (uint j = jStart; j < offsetTimes.n_elem; ++j) {
 
             offsetTime = offsetTimes(j);
 
-            //            if (debug) cout << "testing offsettime " << offsetTime << endl;
+            if (debug) cout << "testing offsettime " << offsetTime << endl;
 
             if (offsetTime <= end)
             {
-                //                if (debug) cout << "adding interval " << start << " - " << offsetTime << endl;
+                if (debug) cout << "adding interval " << start << " - " << offsetTime << endl;
                 m_allLoopChunks.push_back(new LoopChunk(start, offsetTime));
                 start = offsetTime + 1;
-                //                if (debug) cout << "next interval starting at " << start << endl;
+                if (debug) cout << "next interval starting at " << start << endl;
 
                 jStart = j+1;
 
@@ -382,13 +394,13 @@ void MainMesh<pT>::_setupChunks()
             }
         }
 
-        if (start < end)
+        if (start <= end && (i != onsetTimes.n_elem - 1))
         {
-            //            if (debug) cout << "adding remaining interval " << start << " - " << end << endl;
+            if (debug) cout << "adding remaining interval " << start << " - " << end << endl;
             m_allLoopChunks.push_back(new LoopChunk(start, end));
             start = end + 1;
         }
-        //        if (debug) cout << "------------------------\n";
+        if (debug) cout << "------------------------\n";
 
     }
 
@@ -410,7 +422,7 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-//    dumpLoopChunkInfo();
+    //    dumpLoopChunkInfo();
 
 
 }
@@ -428,6 +440,10 @@ void MainMesh<pT>::_executeEvents()
     for (Event<pT> * event : m_currentChunk->m_resetEvents)
     {
         event->reset();
+    }
+
+    for (Event<pT> * event : m_currentChunk->m_resetEvents)
+    {
         event->_iterateCycle();
     }
 
