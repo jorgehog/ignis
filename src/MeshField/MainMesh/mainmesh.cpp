@@ -422,8 +422,10 @@ void MainMesh<pT>::_setupChunks()
         }
     }
 
-    //    dumpLoopChunkInfo();
 
+#ifndef NDEBUG
+    dumpLoopChunkInfo();
+#endif
 
 }
 
@@ -446,8 +448,6 @@ void MainMesh<pT>::_executeEvents()
     {
         event->_iterateCycle();
     }
-
-
 
 }
 
