@@ -228,7 +228,7 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
         if (m_terminate)
         {
-            terminateMessage(*loopCycle, nCycles);
+            _terminate(*loopCycle, nCycles);
 
             break;
         }

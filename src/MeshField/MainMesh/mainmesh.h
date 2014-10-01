@@ -142,7 +142,7 @@ public:
         m_terminator = terminator;
     }
 
-    void terminateMessage(const uint cycle, const uint nCycles)
+    void _terminate(const uint cycle, const uint nCycles)
     {
         cout << "ignis::eventLoop terminated by "
              << m_terminator
@@ -151,10 +151,15 @@ public:
 
         if (!m_terminateMessage.empty())
         {
-            cout << ". What: " << m_terminateMessage;
+            cout << ". What: " << m_terminateMessage << ".";
         }
 
         cout << endl;
+
+        if (m_storeEvents)
+        {
+            m_storedEventValues.resize(cycle/saveValuesSpacing(), numberOfStoredEvents());
+        }
     }
 
 
