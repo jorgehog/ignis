@@ -78,7 +78,14 @@ public:
         addEvent(*event);
     }
 
+    bool hasEvent(const Event<pT> *event) const
+    {
+        return std::find(m_events.begin(), m_events.end(), event) != m_events.end();
+    }
+
     void removeEvent(uint i);
+
+    void removeEvent(const Event<pT> *event);
 
     void addSubField(MeshField &subField);
 

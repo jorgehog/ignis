@@ -86,6 +86,11 @@ template<typename pT>
 void MainMesh<pT>::_finalize()
 {
 
+    for (Event<pT> *event : m_allEvents)
+    {
+           event->markAsInitialized(false);
+    }
+
     for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
     {
         delete intrinsicEvent;
@@ -171,6 +176,7 @@ template<typename pT>
 void MainMesh<pT>::_initializeEventStorage(const uint size)
 {
 
+    m_storedEventTypes.clear();
     for (Event<pT> *event : m_storageEnabledEvents)
     {
         m_storedEventTypes.push_back(event->type() + ("@" + event->meshField().description()));
@@ -183,6 +189,8 @@ void MainMesh<pT>::_initializeEventStorage(const uint size)
 
     if (m_storeEventsToFile)
     {
+        BADAssBool(!m_eventStorageFile.is_open());
+
         m_eventStorageFile.open(m_outputPath + m_filename, std::ios::binary);
 
         uint nCols = m_storageEnabledEvents.size();

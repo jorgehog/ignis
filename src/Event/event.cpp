@@ -26,6 +26,11 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
 template<typename pT>
 Event<pT>::~Event()
 {
+    if (meshField().hasEvent(this))
+    {
+        m_meshField->removeEvent(this);
+    }
+
     m_refCounter--;
 
     if (m_refCounter == 0)

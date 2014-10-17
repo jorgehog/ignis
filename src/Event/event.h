@@ -35,9 +35,9 @@ public:
         return m_initialized;
     }
 
-    void markAsInitialized()
+    void markAsInitialized(const bool state = true)
     {
-        m_initialized = true;
+        m_initialized = state;
     }
 
     virtual void execute() = 0;
@@ -146,6 +146,11 @@ public:
 
     bool hasStarted() const
     {
+        if (onsetTime() == IGNIS_UNSET_UINT)
+        {
+            return false;
+        }
+
         return loopCycle() >= m_onsetTime;
     }
 
@@ -176,15 +181,7 @@ public:
 
     uint loopCycle() const
     {
-        if (m_loopCycle == NULL)
-        {
-            return 0;
-        }
-
-        else
-        {
-            return *m_loopCycle;
-        }
+        return *m_loopCycle;
     }
 
     void setValue(double value)

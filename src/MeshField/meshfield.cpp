@@ -71,6 +71,12 @@ void MeshField<pT>::removeEvent(uint i)
 }
 
 template<typename pT>
+void MeshField<pT>::removeEvent(const Event<pT> *event)
+{
+    removeEvent(event->meshAddress());
+}
+
+template<typename pT>
 void MeshField<pT>::resetSubFields()
 {
     for (MeshField<pT> *subField : m_subFields)
