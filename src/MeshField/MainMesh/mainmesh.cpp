@@ -88,7 +88,7 @@ void MainMesh<pT>::_finalize()
 
     for (Event<pT> *event : m_allEvents)
     {
-           event->markAsInitialized(false);
+        event->markAsInitialized(false);
     }
 
     for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
@@ -127,8 +127,8 @@ void MainMesh<pT>::dumpLoopChunkInfo()
     for (LoopChunk * loopChunk : m_allLoopChunks) {
 
         cout << "Loopchunk interval: [" << loopChunk->m_start << " " << loopChunk->m_end << "]" << endl;
-        cout << "has " << loopChunk->m_executeEvents.size() << " events: " << endl;
-        for (Event<pT>* event : loopChunk->m_executeEvents) {
+        cout << "has " << loopChunk->m_events.size() << " events: " << endl;
+        for (Event<pT>* event : loopChunk->m_events) {
             cout << "  " << setw(2) << right << event->priority() << "  "
                  << setw(30) << left << event->type()
                  << "["
@@ -329,10 +329,11 @@ void MainMesh<pT>::_sortEvents()
 template<typename pT>
 void MainMesh<pT>::_initializeNewEvents()
 {
-    for (Event<pT>* event : m_currentChunk->m_executeEvents) {
+    for (Event<pT>* event : m_currentChunk->m_events) {
 
         if (!event->initialized())
         {
+            event->_zeroCycle();
             event->initialize();
             event->markAsInitialized();
         }
@@ -427,15 +428,7 @@ void MainMesh<pT>::_setupChunks()
     for (Event<pT>* event : m_allEvents) {
         for (LoopChunk* loopChunk : m_allLoopChunks) {
             if (event->onsetTime() <= loopChunk->m_start && event->offsetTime() >= loopChunk->m_end) {
-
-                if (event->_hasExecuteImpl()) {
-                    loopChunk->m_executeEvents.push_back(event);
-                }
-
-                if (event->_hasResetImpl()) {
-                    loopChunk->m_resetEvents.push_back(event);
-                }
-
+                loopChunk->m_events.push_back(event);
             }
         }
     }
@@ -452,17 +445,17 @@ template<typename pT>
 void MainMesh<pT>::_executeEvents()
 {
 
-    for (Event<pT> * event : m_currentChunk->m_executeEvents)
+    for (Event<pT> * event : m_currentChunk->m_events)
     {
         event->execute();
     }
 
-    for (Event<pT> * event : m_currentChunk->m_resetEvents)
+    for (Event<pT> * event : m_currentChunk->m_events)
     {
         event->reset();
     }
 
-    for (Event<pT> * event : m_currentChunk->m_resetEvents)
+    for (Event<pT> * event : m_currentChunk->m_events)
     {
         event->_iterateCycle();
     }
@@ -474,7 +467,7 @@ void MainMesh<pT>::dumpEvents() const
 {
 
     bool endline = false;
-    for (Event<pT>* event : m_currentChunk->m_executeEvents)
+    for (Event<pT>* event : m_currentChunk->m_events)
     {
         if (event->hasOutput())
         {

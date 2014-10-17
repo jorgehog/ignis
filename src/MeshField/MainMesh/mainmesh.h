@@ -202,8 +202,7 @@ private:
         uint m_start;
         uint m_end;
 
-        std::vector<Event<pT> *> m_executeEvents;
-        std::vector<Event<pT> *> m_resetEvents;
+        std::vector<Event<pT> *> m_events;
 
         LoopChunk(uint i, uint j) : m_start(i), m_end(j) {}
 

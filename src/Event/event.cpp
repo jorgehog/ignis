@@ -14,7 +14,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     m_storeValue(toFile),
     m_unit(unit),
     m_meshField(NULL),
-    m_cycle(0),
+    m_cycle(IGNIS_UNSET_UINT),
     m_initialized(false),
     m_onsetTime(IGNIS_UNSET_UINT),
     m_offsetTime(IGNIS_UNSET_UINT),

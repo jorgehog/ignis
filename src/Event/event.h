@@ -246,16 +246,9 @@ public:
 
     }
 
-    bool _hasExecuteImpl() const
+    void _zeroCycle()
     {
-        //        return (&this->execute != &Event::execute);
-        return true;
-    }
-
-    bool _hasResetImpl() const
-    {
-        //        return (&this->reset != &Event::reset);
-        return true;
+        m_cycle = 0;
     }
 
     void _iterateCycle()
