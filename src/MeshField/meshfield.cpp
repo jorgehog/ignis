@@ -35,10 +35,7 @@ MeshField<pT>::MeshField(const std::initializer_list<pT> topology, const std::st
 template<typename pT>
 MeshField<pT>::~MeshField()
 {
-    for (MeshField<pT> *meshField : m_subFields)
-    {
-        delete meshField;
-    }
+
 }
 
 
