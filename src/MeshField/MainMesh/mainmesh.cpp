@@ -152,7 +152,6 @@ void MainMesh<pT>::_streamValueToFile(const double value)
 template<typename pT>
 void MainMesh<pT>::_storeEventValues(const uint index)
 {
-
     for (uint i = 0; i < numberOfStoredEvents(); ++i)
     {
         const double &value = m_storageEnabledEvents.at(i)->value();
@@ -168,6 +167,8 @@ void MainMesh<pT>::_storeEventValues(const uint index)
         }
 
     }
+
+    m_eventStorageFile.flush();
 
 }
 

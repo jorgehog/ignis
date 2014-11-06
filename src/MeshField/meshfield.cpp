@@ -325,6 +325,10 @@ void MeshField<pT>::scaleField(const Col<pT> & oldShape, const topmat &oldTopolo
 template<typename pT>
 void MeshField<pT>::_prepareEvent(Event<pT> *event, const uint nCycles, const uint *loopCyclePtr)
 {
+    event->setValue(0);
+
+    event->valueSetThisCycle(false);
+
     event->_setPriority();
 
     event->_setNumberOfCycles(nCycles);

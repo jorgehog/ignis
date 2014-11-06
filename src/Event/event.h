@@ -215,6 +215,11 @@ public:
         m_meshAddress = i;
     }
 
+    void valueSetThisCycle(const bool state)
+    {
+        m_valueSetThisCycle = state;
+    }
+
     void _setExplicitTimes();
 
     string dumpString();
