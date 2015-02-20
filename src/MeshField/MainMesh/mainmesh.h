@@ -86,7 +86,7 @@ public:
         return m_filename;
     }
 
-    void enableProgressReport(const bool state)
+    void enableProgressReport(const bool state = true)
     {
         m_reportProgress = state;
     }
