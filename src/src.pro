@@ -8,7 +8,6 @@ TARGET = ../lib/ignis
 
 VERSION = 2.0.0
 
-
 HEADERS += \
     defines.h \
     Particles/particles.h \
@@ -17,7 +16,8 @@ HEADERS += \
     MeshField/MainMesh/mainmesh.h \
     MeshField/MainMesh/intrinsicevents.h \
     Event/predefinedevents.h \
-    positionhandler.h
+    positionhandler.h \
+    Event/dcvizevents.h
 
 
 OTHER_FILES += \

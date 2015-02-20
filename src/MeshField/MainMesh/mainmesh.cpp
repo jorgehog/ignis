@@ -37,7 +37,9 @@ MainMesh<pT>::~MainMesh()
 template<typename pT>
 void MainMesh<pT>::onConstruct()
 {
-    m_doOutput = false;
+    m_doOutput = true;
+
+    m_outputSpacing = 1;
 
     m_storeEvents = false;
 
@@ -47,12 +49,8 @@ void MainMesh<pT>::onConstruct()
 
     setOutputPath("/tmp/");
 
-    BADAss(m_currentParticles, !=, NULL);
+    m_handleParticles = (m_currentParticles != NULL);
 
-    for (uint i = 0; i < m_currentParticles->count(); ++i)
-    {
-        this->m_atoms.push_back(i);
-    }
 }
 
 template<typename pT>
@@ -225,8 +223,6 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
         for (*loopCycle = m_currentChunk->m_start; *loopCycle <= m_currentChunk->m_end; ++(*loopCycle))
         {
-            _updateContainments();
-
             _executeEvents();
 
             if (m_terminate)
@@ -273,6 +269,12 @@ void MainMesh<pT>::_sendToTop(Event<pT> &event)
 template<typename pT>
 void MainMesh<pT>::_addIntrinsicEvents()
 {
+    if (m_handleParticles)
+    {
+        _particleHandler<pT> *_handler = new _particleHandler<pT>(this);
+        _handler->setManualPriority();
+        this->_addIntrinsicEvent(_handler);
+    }
 
     if (m_reportProgress)
     {

@@ -7,6 +7,33 @@
 namespace ignis
 {
 
+
+template<typename pT>
+class _particleHandler : public Event<pT>
+{
+public:
+
+    _particleHandler(MainMesh<pT> *mm) : Event<pT>("particleHandler"), mm(mm) {}
+
+    void initialize()
+    {
+        for (uint i = 0; i < mm->m_currentParticles->count(); ++i)
+        {
+            mm->m_atoms.push_back(i);
+        }
+    }
+
+    void execute()
+    {
+        mm->_updateContainments();
+    }
+
+private:
+
+    MainMesh<pT> *mm;
+
+};
+
 template<typename pT>
 class _reportProgress : public Event<pT>
 {
@@ -17,7 +44,8 @@ public:
 
     _reportProgress() : Event<pT>("Progress", "%", true) {}
 
-    void execute() {
+    void execute()
+    {
         this->setValue(loopCycle()*100.0/m_nCycles);
     }
 };

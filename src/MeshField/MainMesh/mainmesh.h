@@ -9,6 +9,9 @@ namespace ignis
 {
 
 template<typename pT>
+class _particleHandler;
+
+template<typename pT>
 class MainMesh : public MeshField<pT>
 {
 
@@ -162,6 +165,7 @@ public:
         }
     }
 
+    friend class _particleHandler<pT>;
 
 private:
 
@@ -180,6 +184,8 @@ private:
     std::vector<Event<pT> *> m_intrinsicEvents;
 
     std::vector<Event<pT> *> m_storageEnabledEvents;
+
+    bool m_handleParticles;
 
     bool m_doOutput;
     uint m_outputSpacing;
@@ -239,7 +245,6 @@ private:
     }
 
     void _finalize();
-
 
 };
 

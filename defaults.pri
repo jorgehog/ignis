@@ -38,8 +38,6 @@ QMAKE_LFLAGS_RELEASE += -O3
 QMAKE_LFLAGS_DEBUG += -g
 
 
-
-
 DEFINES += \
     ARMA_MAT_PREALLOC=3
 
@@ -47,8 +45,9 @@ UTILS = $$PWD/utils
 
 INCLUDEPATH += $$UTILS
 
-LIBS += -larmadillo -llapack -lblas -L$$UTILS/DCViz/lib -lDCViz
+QMAKE_LIBDIR += $$UTILS/DCViz/lib
 
+LIBS += -larmadillo -llapack -lblas -lDCViz
 
 TOP_PWD = $$PWD
 
