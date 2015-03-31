@@ -106,9 +106,33 @@ public:
         return m_dependancies;
     }
 
-    template<typename T>
-    const T *dependency(const string dependencyType) const
+    void disableDependancyCache()
     {
+        m_useDependancyCache = false;
+    }
+
+    template<typename T>
+    const T *dependency(const string dependencyType)
+    {
+        if (m_useDependancyCache)
+        {
+            if (!m_dependancyCacheString.empty())
+            {
+                if (dependencyType == m_dependancyCacheString)
+                {
+                    return static_cast<const T*>(m_cachedDependancy);
+                }
+            }
+            else
+            {
+                m_dependancyCacheString = dependencyType;
+                m_useDependancyCache = false;
+                m_cachedDependancy = dependency(dependencyType);
+                m_useDependancyCache = true;
+                return static_cast<const T*>(m_cachedDependancy);
+            }
+        }
+
         const auto &loot = m_dependancies.find(dependencyType);
 
         BADAss(loot, !=, m_dependancies.end(), "Dependency not found.", [&] ()
@@ -119,7 +143,7 @@ public:
         return static_cast<const T*>(loot->second);
     }
 
-    const Event<pT> *dependency(const string dependencyType) const
+    const Event<pT> *dependency(const string dependencyType)
     {
         return dependency<const Event<pT> >(dependencyType);
     }
@@ -174,7 +198,7 @@ public:
         return m_eventLength;
     }
 
-    double value() const
+    const double &value() const
     {
         return *m_value;
     }
@@ -228,27 +252,21 @@ public:
 
     void setOnsetTime(uint onsetTime)
     {
-
         if (onsetTime == IGNIS_UNSET_UINT) return;
 
         this->m_onsetTime = onsetTime;
-
     }
 
     void setOffsetTime(uint offTime)
     {
-
         if (offTime == IGNIS_UNSET_UINT) return;
         m_offsetTime = offTime;
-
     }
 
     void setTrigger(uint t)
     {
-
         setOnsetTime(t);
         setOffsetTime(t);
-
     }
 
     void _zeroCycle()
@@ -337,6 +355,10 @@ private:
     PositionHandler<pT> *m_registeredHandler;
 
     map<const string, const Event<pT> *> m_dependancies;
+
+    bool m_useDependancyCache;
+    string m_dependancyCacheString;
+    const Event<pT> *m_cachedDependancy;
 
 };
 
