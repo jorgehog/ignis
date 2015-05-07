@@ -106,6 +106,31 @@ public:
         return m_dependancies;
     }
 
+    bool dependsOn(const Event<pT> *event, const bool recursive = true) const
+    {
+
+        for (const auto &it: m_dependancies)
+        {
+            const Event<pT> *dependency = it.second;
+
+            if (dependency == event)
+            {
+                return true;
+            }
+
+            if (recursive)
+            {
+                if (dependency->dependsOn(event))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+    }
+
     void disableDependancyCache()
     {
         m_useDependancyCache = false;
