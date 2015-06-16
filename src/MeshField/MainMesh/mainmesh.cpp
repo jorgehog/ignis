@@ -31,12 +31,21 @@ MainMesh<pT>::MainMesh(const std::initializer_list<pT> topology) :
 template<typename pT>
 MainMesh<pT>::~MainMesh()
 {
+    if (!m_finalized)
+    {
+        finalize();
+    }
 
+    delete m_loopCycle;
 }
 
 template<typename pT>
 void MainMesh<pT>::onConstruct()
 {
+    m_loopCycle = new uint(0);
+
+    m_finalized = true;
+
     m_doOutput = true;
 
     m_outputSpacing = 1;
@@ -81,8 +90,14 @@ void MainMesh<pT>::_updateContainments()
 }
 
 template<typename pT>
-void MainMesh<pT>::_finalize()
+void MainMesh<pT>::finalize()
 {
+
+    if (m_finalized)
+    {
+        cout << "warning: event loop already finalized" << endl;
+        return;
+    }
 
     for (Event<pT> *event : m_allEvents)
     {
@@ -113,6 +128,8 @@ void MainMesh<pT>::_finalize()
     {
         m_eventStorageFile.close();
     }
+
+    m_finalized = true;
 
 }
 
@@ -203,11 +220,19 @@ void MainMesh<pT>::_initializeEventStorage(const uint size)
 template<typename pT>
 void MainMesh<pT>::eventLoop(const uint nCycles)
 {
-    uint* loopCycle = new uint(0);
+    if (!m_finalized)
+    {
+        cerr << "previous eventloop is not finalized." << endl;
+        exit(1);
+    }
+
+    *m_loopCycle = 0;
+
+    m_finalized = false;
 
     _addIntrinsicEvents();
 
-    this->_prepareEvents(nCycles, loopCycle);
+    this->_prepareEvents(nCycles, m_loopCycle);
 
     _sortEvents();
 
@@ -221,7 +246,7 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
         _initializeNewEvents();
 
-        for (*loopCycle = m_currentChunk->m_start; *loopCycle <= m_currentChunk->m_end; ++(*loopCycle))
+        for (*m_loopCycle = m_currentChunk->m_start; *m_loopCycle <= m_currentChunk->m_end; ++(*m_loopCycle))
         {
             _executeEvents();
 
@@ -229,19 +254,23 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
             {
                 break;
             }
+
+            if (m_stop)
+            {
+                return;
+            }
         }
 
         if (m_terminate)
         {
-            _terminate(*loopCycle, nCycles);
+            _terminate(*m_loopCycle, nCycles);
 
             break;
         }
+
     }
 
-    delete loopCycle;
-
-    _finalize();
+    finalize();
 
 }
 

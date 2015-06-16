@@ -139,6 +139,7 @@ public:
 
     virtual void terminateLoop(std::string terminateMessage = "", std::string terminator = "Unknown");
 
+    virtual void stopLoop();
 
     friend class MainMesh<pT>;
 

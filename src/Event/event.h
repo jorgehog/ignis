@@ -304,6 +304,35 @@ public:
         m_cycle++;
     }
 
+    const pT registeredHandler(const uint n, const uint d) const
+    {
+        return (*m_registeredHandler)(n, d);
+    }
+
+    pT &registeredHandler(const uint n, const uint d)
+    {
+        return (*m_registeredHandler)(n, d);
+    }
+
+    PositionHandler<pT> & registeredHandler() const
+    {
+        return *m_registeredHandler;
+    }
+
+    uint totalNumberOfParticles() const
+    {
+        return m_registeredHandler->count();
+    }
+
+    void terminateLoop(std::string terminateMessage = "")
+    {
+        m_meshField->terminateLoop(terminateMessage, description());
+    }
+
+    void stopLoop()
+    {
+        m_meshField->stopLoop();
+    }
 
 
 protected:
@@ -348,32 +377,6 @@ protected:
     uint m_onsetTime;
 
     uint m_offsetTime;
-
-
-    const pT registeredHandler(const uint n, const uint d) const
-    {
-        return (*m_registeredHandler)(n, d);
-    }
-
-    pT &registeredHandler(const uint n, const uint d)
-    {
-        return (*m_registeredHandler)(n, d);
-    }
-
-    PositionHandler<pT> & registeredHandler() const
-    {
-        return *m_registeredHandler;
-    }
-
-    uint totalNumberOfParticles() const
-    {
-        return m_registeredHandler->count();
-    }
-
-    void terminateLoop(std::string terminateMessage = "")
-    {
-        m_meshField->terminateLoop(terminateMessage, description());
-    }
 
 private:
 

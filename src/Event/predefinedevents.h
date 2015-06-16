@@ -11,8 +11,33 @@
 #include <fstream>
 #include <armadillo>
 
+#include <functional>
+
+using std::function;
+
 namespace ignis
 {
+
+template<typename pT>
+class BasicEvent : public Event<pT>
+{
+public:
+  BasicEvent(std::string name, function<void(BasicEvent<pT>* event)> executeFunction) :
+      Event<pT>(name),
+    m_executeFunction(executeFunction)
+  {
+
+  }
+
+  void execute()
+  {
+      m_executeFunction(this);
+  }
+
+private:
+  const function<void(BasicEvent<pT>* event)> m_executeFunction;
+
+};
 
 inline void loadArmaFromIgn(arma::mat &matrix, const string path)
 {
@@ -270,6 +295,5 @@ public:
     }
 
 };
-
 
 }

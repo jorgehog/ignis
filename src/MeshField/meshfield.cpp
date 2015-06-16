@@ -127,6 +127,12 @@ void MeshField<pT>::terminateLoop(std::string terminateMessage, std::string term
 }
 
 template<typename pT>
+void MeshField<pT>::stopLoop()
+{
+    m_parent->stopLoop();
+}
+
+template<typename pT>
 bool MeshField<pT>::checkSubFields(uint i)
 {
 

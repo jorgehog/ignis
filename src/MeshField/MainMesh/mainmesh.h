@@ -138,6 +138,11 @@ public:
 
     void dumpLoopChunkInfo();
 
+    void stopLoop()
+    {
+        m_stop = true;
+    }
+
     void terminateLoop(std::string terminateMessage = "", std::string terminator = "Unknown")
     {
         m_terminate = true;
@@ -165,9 +170,15 @@ public:
         }
     }
 
+    void finalize();
+
     friend class _particleHandler<pT>;
 
 private:
+
+    uint *m_loopCycle;
+
+    bool m_finalized;
 
     static PositionHandler<pT> *m_currentParticles;
 
@@ -197,6 +208,8 @@ private:
     std::string m_filename;
 
     bool m_reportProgress;
+
+    bool m_stop;
 
     bool m_terminate;
     std::string m_terminateMessage;
@@ -243,8 +256,6 @@ private:
         this->addEvent(event);
         m_intrinsicEvents.push_back(event);
     }
-
-    void _finalize();
 
 };
 
