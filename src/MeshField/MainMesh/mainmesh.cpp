@@ -238,6 +238,7 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
 
     _setupChunks();
 
+    m_stop = false;
     m_terminate = false;
 
     for (LoopChunk* loopChunk : m_allLoopChunks) {
