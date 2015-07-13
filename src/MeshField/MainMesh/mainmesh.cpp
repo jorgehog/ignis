@@ -191,11 +191,26 @@ void MainMesh<pT>::_storeEventValues(const uint index)
 template<typename pT>
 void MainMesh<pT>::_initializeEventStorage(const uint size)
 {
+    std::stringstream typeHeader;
+    Event<pT> *event;
 
     m_storedEventTypes.clear();
-    for (Event<pT> *event : m_storageEnabledEvents)
+    for (uint i = 0; i < m_storageEnabledEvents.size(); ++i)
     {
+        event = m_storageEnabledEvents.at(i);
+
         m_storedEventTypes.push_back(event->type() + ("@" + event->meshField().description()));
+
+        typeHeader << m_storedEventTypes.back();
+
+        if (i == m_storageEnabledEvents.size() - 1)
+        {
+            typeHeader << "\n";
+        }
+        else
+        {
+            typeHeader << " ";
+        }
     }
 
     if (m_storeEvents)
@@ -211,6 +226,7 @@ void MainMesh<pT>::_initializeEventStorage(const uint size)
 
         uint nCols = m_storageEnabledEvents.size();
 
+        m_eventStorageFile.write(typeHeader.str().c_str(), typeHeader.tellp());
         m_eventStorageFile.write(reinterpret_cast<const char*>(&size), sizeof(uint));
         m_eventStorageFile.write(reinterpret_cast<const char*>(&nCols), sizeof(uint));
 
