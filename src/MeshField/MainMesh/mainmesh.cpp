@@ -134,6 +134,28 @@ void MainMesh<pT>::finalize()
 }
 
 template<typename pT>
+void MainMesh<pT>::removeEventFromChunks(Event<pT> *event)
+{
+    if (!m_stop)
+    {
+        return;
+    }
+
+    for (uint chunkIndex = m_currentChunkIndex; chunkIndex < m_allLoopChunks.size(); ++chunkIndex)
+    {
+        LoopChunk *chunk = m_allLoopChunks.at(chunkIndex);
+        std::vector<Event<pT>*> &ev = chunk->m_events;
+
+        ev.erase( std::remove( ev.begin(), ev.end(), event ), ev.end() );
+
+        for (Event<pT> *remainingEvent : ev)
+        {
+            BADAssBool(!remainingEvent->dependsOn(event), "Removing event which the remaining events depend on. Check your order or removal.");
+        }
+    }
+}
+
+template<typename pT>
 void MainMesh<pT>::dumpLoopChunkInfo()
 {
 
@@ -257,30 +279,42 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
     m_stop = false;
     m_terminate = false;
 
-    for (LoopChunk* loopChunk : m_allLoopChunks) {
+    runChunks();
 
-        m_currentChunk = loopChunk;
+}
+
+template<typename pT>
+void MainMesh<pT>::runChunks()
+{
+    BADAssBool(!m_allLoopChunks.empty());
+
+    runChunks(0);
+}
+
+template<typename pT>
+void MainMesh<pT>::runChunks(const uint start)
+{
+    if (m_stop || m_terminate)
+    {
+        return;
+    }
+
+    for (m_currentChunkIndex = start; m_currentChunkIndex < m_allLoopChunks.size(); ++m_currentChunkIndex)
+    {
+        m_currentChunk = m_allLoopChunks.at(m_currentChunkIndex);
 
         _initializeNewEvents();
 
-        for (*m_loopCycle = m_currentChunk->m_start; *m_loopCycle <= m_currentChunk->m_end; ++(*m_loopCycle))
+        runCurrentChunk();
+
+        if (m_stop)
         {
-            _executeEvents();
-
-            if (m_terminate)
-            {
-                break;
-            }
-
-            if (m_stop)
-            {
-                return;
-            }
+            return;
         }
 
         if (m_terminate)
         {
-            _terminate(*m_loopCycle, nCycles);
+            _terminate(*m_loopCycle);
 
             break;
         }
@@ -288,7 +322,40 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
     }
 
     finalize();
+}
 
+template<typename pT>
+void MainMesh<pT>::runCurrentChunk()
+{
+    runCurrentChunk(m_currentChunk->m_start);
+}
+
+template<typename pT>
+void MainMesh<pT>::runCurrentChunk(const uint start)
+{
+    BADAss(start, >=, m_currentChunk->m_start);
+
+    for (*m_loopCycle = start; *m_loopCycle <= m_currentChunk->m_end; ++(*m_loopCycle))
+    {
+        _executeEvents();
+
+        if (m_terminate || m_stop)
+        {
+            break;
+        }
+    }
+}
+
+template<typename pT>
+void MainMesh<pT>::reConnect()
+{
+    BADAssBool(m_stop);
+    m_stop = false;
+    m_terminate = false;
+
+    runCurrentChunk(*m_loopCycle + 1);
+
+    runChunks(m_currentChunkIndex + 1);
 }
 
 template<typename pT>

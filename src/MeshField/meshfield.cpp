@@ -59,12 +59,14 @@ bool MeshField<pT>::isWithinThis(uint i) {
 template<typename pT>
 void MeshField<pT>::removeEvent(uint i)
 {
+    mainMesh()->removeEventFromChunks(m_events.at(i));
+
     m_events.erase(m_events.begin() + i);
 
     for (uint j = i; j < m_events.size(); ++j)
     {
         m_events.at(j)->setAddress(j);
-    }
+    }       
 }
 
 template<typename pT>

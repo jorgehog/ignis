@@ -143,6 +143,11 @@ public:
 
     friend class MainMesh<pT>;
 
+    virtual MainMesh<pT> *mainMesh()
+    {
+        return m_parent->mainMesh();
+    }
+
 protected:
 
     const std::string m_description;

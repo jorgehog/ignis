@@ -72,6 +72,16 @@ public:
 
     void eventLoop(const uint nCycles);
 
+    void runChunks();
+
+    void runChunks(const uint start);
+
+    void runCurrentChunk();
+
+    void runCurrentChunk(const uint start);
+
+    void reConnect();
+
     void setOutputPath(std::string path);
 
     void dumpEvents() const;
@@ -150,12 +160,12 @@ public:
         m_terminator = terminator;
     }
 
-    void _terminate(const uint cycle, const uint nCycles)
+    void _terminate(const uint cycle)
     {
         cout << "ignis::eventLoop terminated by "
              << m_terminator
              << " at cycle "
-             << cycle << " / " << nCycles;
+             << cycle;
 
         if (!m_terminateMessage.empty())
         {
@@ -171,6 +181,13 @@ public:
     }
 
     void finalize();
+
+    void removeEventFromChunks(Event<pT> *event);
+
+    MainMesh<pT> *mainMesh()
+    {
+        return this;
+    }
 
     friend class _particleHandler<pT>;
 
@@ -231,6 +248,7 @@ private:
     std::vector<LoopChunk *> m_allLoopChunks;
 
     LoopChunk * m_currentChunk;
+    uint m_currentChunkIndex;
 
     void _streamValueToFile(const double value);
 
