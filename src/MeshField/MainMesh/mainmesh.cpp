@@ -264,6 +264,16 @@ void MainMesh<pT>::eventLoop(const uint nCycles)
         exit(1);
     }
 
+    if ((nCycles < m_saveValuesSpacing) && m_storeEvents)
+    {
+        m_storeEvents = false;
+        cerr << "Unable to store events. "
+             << "nCycles = " << nCycles
+             << " is too few for "
+             << "spacing = " << m_saveValuesSpacing
+             << "." << endl;
+    }
+
     *m_loopCycle = 0;
 
     m_finalized = false;
