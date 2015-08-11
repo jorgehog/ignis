@@ -148,10 +148,12 @@ void MainMesh<pT>::removeEventFromChunks(Event<pT> *event)
 
         ev.erase( std::remove( ev.begin(), ev.end(), event ), ev.end() );
 
+#ifndef NDEBUG
         for (Event<pT> *remainingEvent : ev)
         {
             BADAssBool(!remainingEvent->dependsOn(event), "Removing event which the remaining events depend on. Check your order or removal.");
         }
+#endif
     }
 }
 
