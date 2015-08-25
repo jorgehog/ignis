@@ -93,7 +93,7 @@ public:
 
     void setDependency(const Event<pT> *event)
     {
-        BADAss(event, !=, NULL, "null event dependency");
+        BADAss(event, !=, nullptr, "null event dependency");
         m_dependancies[event->type()] = event;
     }
 

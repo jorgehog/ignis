@@ -58,7 +58,7 @@ void MainMesh<pT>::onConstruct()
 
     setOutputPath("/tmp/");
 
-    m_handleParticles = (m_currentParticles != NULL);
+    m_handleParticles = (m_currentParticles != nullptr);
 
 }
 
@@ -612,4 +612,4 @@ void MainMesh<pT>::dumpEvents() const
 }
 
 template<typename pT>
-PositionHandler<pT> *MainMesh<pT>::m_currentParticles = NULL;
+PositionHandler<pT> *MainMesh<pT>::m_currentParticles = nullptr;

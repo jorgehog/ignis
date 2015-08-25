@@ -13,7 +13,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
     m_hasOutput(doOutput),
     m_storeValue(toFile),
     m_unit(unit),
-    m_meshField(NULL),
+    m_meshField(nullptr),
     m_cycle(IGNIS_UNSET_UINT),
     m_initialized(false),
     m_onsetTime(IGNIS_UNSET_UINT),
@@ -27,7 +27,7 @@ Event<pT>::Event(std::string type, std::string unit, bool doOutput, bool toFile)
 template<typename pT>
 Event<pT>::~Event()
 {
-    if (&meshField() != NULL)
+    if (&meshField() != nullptr)
     {
         if (meshField().hasEvent(this))
         {
@@ -127,7 +127,7 @@ std::string Event<pT>::description() const
     stringstream s;
     string meshName;
 
-    if (m_meshField == NULL)
+    if (m_meshField == nullptr)
     {
         meshName = "[no mesh]";
     }
