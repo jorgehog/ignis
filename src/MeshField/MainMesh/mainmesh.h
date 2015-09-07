@@ -80,6 +80,8 @@ public:
 
     void runCurrentChunk(const uint start);
 
+    bool endChunk();
+
     void reConnect();
 
     void setOutputPath(std::string path);
@@ -196,6 +198,8 @@ private:
     uint *m_loopCycle;
 
     bool m_finalized;
+
+    bool m_chunkStarted;
 
     static PositionHandler<pT> *m_currentParticles;
 

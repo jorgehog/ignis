@@ -317,18 +317,16 @@ void MainMesh<pT>::runChunks(const uint start)
 
         _initializeNewEvents();
 
-        runCurrentChunk();
-
-        if (m_stop)
+        if (endChunk())
         {
             return;
         }
 
-        if (m_terminate)
-        {
-            _terminate(*m_loopCycle);
+        runCurrentChunk();
 
-            break;
+        if (endChunk())
+        {
+            return;
         }
 
     }
@@ -347,6 +345,8 @@ void MainMesh<pT>::runCurrentChunk(const uint start)
 {
     BADAss(start, >=, m_currentChunk->m_start);
 
+    m_chunkStarted = true;
+
     for (*m_loopCycle = start; *m_loopCycle <= m_currentChunk->m_end; ++(*m_loopCycle))
     {
         _executeEvents();
@@ -359,13 +359,39 @@ void MainMesh<pT>::runCurrentChunk(const uint start)
 }
 
 template<typename pT>
+bool MainMesh<pT>::endChunk()
+{
+    if (m_stop)
+    {
+        return true;
+    }
+
+    if (m_terminate)
+    {
+        _terminate(*m_loopCycle);
+        finalize();
+        return true;
+    }
+
+    return false;
+}
+
+template<typename pT>
 void MainMesh<pT>::reConnect()
 {
     BADAssBool(m_stop);
     m_stop = false;
     m_terminate = false;
 
-    runCurrentChunk(*m_loopCycle + 1);
+    if (m_chunkStarted)
+    {
+        runCurrentChunk(*m_loopCycle + 1);
+    }
+
+    else
+    {
+        runCurrentChunk();
+    }
 
     runChunks(m_currentChunkIndex + 1);
 }
@@ -466,6 +492,8 @@ void MainMesh<pT>::_initializeNewEvents()
             event->markAsInitialized();
         }
     }
+
+    m_chunkStarted = false;
 }
 
 

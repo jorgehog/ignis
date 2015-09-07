@@ -19,25 +19,52 @@ namespace ignis
 {
 
 template<typename pT>
-class BasicEvent : public Event<pT>
+class BasicExecuteEvent : public Event<pT>
 {
 public:
-  BasicEvent(std::string name, function<void(BasicEvent<pT>* event)> executeFunction) :
-      Event<pT>(name),
-    m_executeFunction(executeFunction)
-  {
+    BasicExecuteEvent(std::string name, function<void(BasicExecuteEvent<pT>* event)> executeFunction) :
+        Event<pT>(name),
+        m_executeFunction(executeFunction)
+    {
 
-  }
+    }
 
-  void execute()
-  {
-      m_executeFunction(this);
-  }
+    void execute()
+    {
+        m_executeFunction(this);
+    }
 
 private:
-  const function<void(BasicEvent<pT>* event)> m_executeFunction;
+    const function<void(BasicExecuteEvent<pT>* event)> m_executeFunction;
 
 };
+
+template<typename pT>
+class BasicInitializeEvent : public Event<pT>
+{
+public:
+    BasicInitializeEvent(std::string name, function<void(BasicInitializeEvent<pT>* event)> initFunction) :
+        Event<pT>(name),
+        m_initFunction(initFunction)
+    {
+
+    }
+
+    void initialize()
+    {
+        m_initFunction(this);
+    }
+
+    void execute()
+    {
+        //pass
+    }
+
+private:
+    const function<void(BasicInitializeEvent<pT>* event)> m_initFunction;
+
+};
+
 
 inline void loadArmaFromIgn(arma::mat &matrix, const string path)
 {
