@@ -106,6 +106,7 @@ void MainMesh<pT>::finalize()
 
     for (Event<pT> *intrinsicEvent : m_intrinsicEvents)
     {
+        this->removeEvent(intrinsicEvent);
         delete intrinsicEvent;
     }
 

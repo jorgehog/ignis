@@ -81,6 +81,7 @@ TEST(saveAndLoad)
 
     for (SaveData* event : saveDataEvents)
     {
+        mesh.removeEvent(event);
         delete event;
     }
 
