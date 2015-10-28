@@ -444,7 +444,7 @@ void MainMesh<pT>::_addIntrinsicEvents()
         this->_addIntrinsicEvent(_stdout);
     }
 
-    if (m_storeEvents)
+    if (m_storeEvents || m_storeEventsToFile)
     {
         _dumpEventsToFile<pT> *_fileio = new _dumpEventsToFile<pT>(this);
         _fileio->setManualPriority();
