@@ -117,7 +117,7 @@ public:
 
     void enableEventValueStorage(const bool store,
                                  const bool saveToFile,
-                                 const std::string name = "ignisEventsOut.arma",
+                                 const std::string name = "ignisEventsOut.ign",
                                  const std::string path = "/tmp",
                                  const uint saveValuesSpacing = 1)
     {
