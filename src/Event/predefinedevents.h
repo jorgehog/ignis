@@ -10,6 +10,7 @@
 #include <armadillo>
 
 #include <functional>
+#include <assert.h>
 
 using std::function;
 
