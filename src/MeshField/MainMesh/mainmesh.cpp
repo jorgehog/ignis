@@ -261,7 +261,7 @@ void MainMesh<pT>::_initializeEventStorage(const uint size)
 template<typename pT>
 void MainMesh<pT>::eventLoop(const uint nCycles)
 {
-    BADAss(nCycles, !=, 0, "Zero cycles is not allowed. Call initialize manually or add an event which terminate mainloop in initialization instead.");
+    BADAss(nCycles, !=, 0l, "Zero cycles is not allowed. Call initialize manually or add an event which terminate mainloop in initialization instead.");
 
     if (!m_finalized)
     {
