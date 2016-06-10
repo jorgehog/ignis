@@ -102,6 +102,7 @@ void MainMesh<pT>::finalize()
     for (Event<pT> *event : m_allEvents)
     {
         event->markAsInitialized(false);
+        event->resetSetTimes();
     }
 
     for (Event<pT> *intrinsicEvent : m_intrinsicEvents)

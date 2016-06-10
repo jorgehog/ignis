@@ -289,6 +289,12 @@ public:
         m_offsetTime = offTime;
     }
 
+    void resetSetTimes()
+    {
+        m_onsetTime = IGNIS_UNSET_UINT;
+        m_offsetTime = IGNIS_UNSET_UINT;
+    }
+
     void setTrigger(uint t)
     {
         setOnsetTime(t);
